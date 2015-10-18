@@ -4,6 +4,15 @@
  * fazer a conta da distancia direto (ao invés de duas divisoes)
  */
 
+/*
+ * Pins disposition
+ */
+
+#include <string.h>
+
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
 
 //#include <pins_arduino.h>
 //#include <wiring_private.h>
@@ -14,36 +23,43 @@
 #define leftmotor 3
 #define rightmotor 9
 
-#define minDist 150 // minimum obstacle distance from the robot allowed
-#define warningDist 300
-
-// maximum time, in microseconds, allowed for ultrasonic sensor reading
-
-#define time_out 100000
-
-// maximum time, in microseconds, allowed to wait for the previous pulse in sensors echoPin to end
-
-#define prev_pulse_timeout 100000
-
-#define E_L 0
-#define E_M 1
-#define E_F 2
-
-#define Frente 3
-
-#define D_L 4
-#define D_M 5
-#define D_F 6
-
-
-
-// non PWM digital pins were chosen to be sensor pins.
+// sensor pins
 #define trigPin 7
 #define echoPin0 2
 #define echoPin1 4
 #define echoPin2 8
-#define echoPin3 12
-#define echoPin4 11
+#define echoPin3  5  // ------------------  checar isso aqui
+#define echoPin4  6
+
+// SPI pins
+#define CE_PIN   9
+#define CSN_PIN 10    /*
+#define MOSI 11
+#define MISO 12
+#define SCK 13        */
+
+
+
+#define minDist 150 // minimum obstacle distance from the robot allowed
+#define warningDist 300
+
+// maximum time, in microseconds, allowed for ultrasonic sensor reading
+#define time_out 100000
+
+// maximum time, in microseconds, allowed to wait for the previous pulse in sensors echoPin to end
+#define prev_pulse_timeout 100000
+
+#define E_L 0 //turn left softly
+#define E_M 1 // turn left
+#define E_F 2 // turn left abruptly
+
+#define Frente 3 // straight
+
+#define D_L 4 // turn right lightly
+#define D_M 5 // turn right
+#define D_F 6 // turn right abruptly 
+
+
 
 int32_t frequency = 200;    //frequency (in Hz)
 uint8_t pwm_value = 52;     // pwm_value  = Motor Stopped   :  Pulse Widht = 1ns --> 1ms ??
@@ -65,6 +81,12 @@ struct sensor_t
 } USS[5];
 
 
+
+// NOTE: the "LL" at the end of the constant is "LongLong" type
+const uint64_t pipe = 0xE8E8F0F0E1LL; // Define the transmit pipe
+
+RF24 radio(CE_PIN, CSN_PIN); // Create a Radio object
+
 //		FUNCTIONS DECLARATION
 
 void SensorSettings();
@@ -77,37 +99,41 @@ void initTable(int *T);
 
 void setup()
 {
-  //------------------------ Ultrasound Sensors Settings -----------
 
-  //sets ultrasonic ranging module pins, all 5 sensors share trigPin.
+  //set ultrasonic ranging module pins, all 5 sensors share trigPin.
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin0, INPUT);
   pinMode(echoPin1, INPUT);
   pinMode(echoPin2, INPUT);
   pinMode(echoPin3, INPUT);
   pinMode(echoPin4, INPUT);
-  //---------------------------------------------------------------
 
-  // Open hardware serial communications and wait for port to open:
-  Serial.begin(9600);
-
-  // set the data rate for the SoftwareSerial port
-  //  mySerial.begin(9600);
-
-
-  //sets LED pin            ----> desliguei o LED para usar a porta 13, só pra evitar usar as PWM para futuras aplicações ;)
-  //pinMode(13, OUTPUT);
-
-  //sets motors pins
+  // set motors pins
   pinMode(leftmotor, OUTPUT);
   pinMode(rightmotor, OUTPUT);
 
 
 
 
+  // Open hardware serial communications and wait for port to open:
+  Serial.begin(9600);
+  // set the data rate for the SoftwareSerial port
+  //  mySerial.begin(9600);
+  
+//---------------- RADIO SETTINGS ---------------------------------
+
+//open radio pipeline as a receiver  
+  radio.begin();
+  radio.openReadingPipe(1,pipe);
+  radio.startListening();
+  
+//--------------------------------------------------------------------  
+
+  //sets LED pin            ----> desliguei o LED para usar a porta 13, só pra evitar usar as PWM para futuras aplicações 
+  //pinMode(13, OUTPUT);
+
+
   // --------------------- MOTORS SETTINGS -----------------------
-
-
 
   //initialize all timers but 0 to save time keeping functions
   InitTimersSafe();
@@ -137,50 +163,68 @@ void setup()
   //digitalWrite(13, LOW); // turns LED off
   //----------------------------------------------------------------
 
-  t = now();
+  // t = now(); 
 }
 
 void loop()
 {
-  time_t aux;
-  initTable(T);
+	initTable(T);
+	char  msg[10];
+	bool done;
+	register int obstacle;
 
-  while (1)
-  {
-    // Initializing Variables
-    //	register long duration, distance[5];
-    register int obstacle;
+	while(1)
+	{
+		while (radio.available())
+		{
+			// Read the data payload until we've received everything
+			bool done = false;
 
-    //delay(5000);
-    obstacle = SensorReading();
+			while (!done)
+				done = radio.read( msg, sizeof(msg) );	// Fetch the data payload
+			
+			if(strcmp(msg,"OK") == 0)
+			{
+					// we're ok to run for the next 500ms 
+				t = micros();
+				while(micros() < 500000 + t)
+				{
+					obstacle = SensorReading();
 
-    // Danger Zone
-    if (obstacle < 0)
-    {
-      //   STOP !!!
-      pwmWrite(leftmotor, pwm_value);
-      pwmWrite(rightmotor, pwm_value);
-    }
+					// Danger Zone
+					if (obstacle < 0)
+					{
+						//   STOP !!!
+						pwmWrite(leftmotor, pwm_value);
+						pwmWrite(rightmotor, pwm_value);
+					}
 
-    // Warning Zone
-    else if (obstacle > 0)
-      speedControl(obstacle);
+					// Warning Zone
+					else if (obstacle > 0)
+					speedControl(obstacle);
 
-    // Safe Zone
-    else
-    {
-      pwmWrite(leftmotor, fullSpeed);
-      pwmWrite(rightmotor, fullSpeed);
-    }
-    aux = now() - t;
-    /*
-     if(aux > 15)
-    	 setup();
-      */
-    SensorsDataSerialPrint();
-    delay(1000);
+					// Safe Zone
+					else
+					{
+						pwmWrite(leftmotor, fullSpeed);
+						pwmWrite(rightmotor, fullSpeed);
+					}
+				}
+			}
+			else
+			{
+				//   STOP !!!
+				pwmWrite(leftmotor, pwm_value);
+				pwmWrite(rightmotor, pwm_value);
 
-  }
+			}
+			//SensorsDataSerialPrint();
+			//delay(1000);
+		}
+		//   STOP !!!
+		pwmWrite(leftmotor, pwm_value);
+		pwmWrite(rightmotor, pwm_value);
+	}
 }
 
 // incluir tratativas de erro?
