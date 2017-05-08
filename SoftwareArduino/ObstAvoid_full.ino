@@ -1,5 +1,3 @@
-// Chapa de aço 30cm x 2cm 
-
 // TODO referenciar direitinho as referencias
 
 
@@ -56,19 +54,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #define stop_pwm_l 110 // pwm in which left motor is stopped
 #define stop_pwm_r 90  // pwm in which right motor is stopped
-#define fullSpeed_l 170
-#define fullSpeed_r 170
-#define avgSpeed_l 140
-#define avgSpeed_r 150
-#define lowSpeed_l 120
-#define lowSpeed_r 100
+
+int fullSpeed_l =  170;
+int fullSpeed_r =  170;
+int avgSpeed_l =  140;
+int avgSpeed_r =  150;
+int lowSpeed_l =  120;
+int lowSpeed_r =  100;
 
 #define buffer_size 50
 
 // --------- deadlines (in millisseconds)----------------------------
 #define t_max 100  // TODO: give it a better name
 #define t_start 500 // deadline for loss of radio connection when running - autonomous() as well as start() -
-#define time_out 60 // USS reading deadline <=> 6.8m (datasheet fala que só vai até 4m...)
+#define time_out 30 // USS reading deadline <=> 6.8m (datasheet fala que só vai até 4m...)
 
 // RADIO RELATED
 
@@ -88,11 +87,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define echoPin3 A1 
 #define echoPin4 A2
 // ---------- obstacle avoidance related defines ---
-
-//TODO: nao esquecer de arrumar de novo!!!!
 #define minDist 50 // obstacle can't get any closer than minDist (in cm) from the robot
 #define warningDist 350 // minDist < obstacle distance < warningDist => warning zone!
 #define outOfRange 400
+
+//TODO: nao esquecer de arrumar de novo!!!!
 
 #define E_L 0 // turn softly to the left
 #define E_M 1 // turn to the left
@@ -120,9 +119,10 @@ bool left; // left motor on/off flag
 bool right; // right motor on/off flag
 bool speed; // if true, try to read pwm_value from remote control
 bool frequency;// if true, try to read frequency from remote control
-bool dyn = 0; // dynamical/fixed USS echo reading
+bool dyn = 1; // dynamical/fixed USS echo reading
 bool all_sensors = 0;
 
+int obstacle_avoidance_method = 0;
 // -------- communication related variables -----------------
 const uint64_t pipe = 0xDEDEDEDEE7LL; // Define the transmit pipe (Obs.: "LL" => "LongLong" type)
 RF24 radio(CE_PIN, CSN_PIN); // Create a Radio Object
@@ -154,6 +154,11 @@ short int *T;                  // Truth Table
 /*=======================================================================================================*/
 
 /*========================= FUNCTIONS  ============================================================*/
+
+void ObstacleAvoidanceTechnique(int obstacle_avoidance_method, int obstacle);
+void proportionalController();
+
+
 void autonomous();
 void logging();
 void flushLogData(int); // TODO: find a better name for it.
@@ -295,7 +300,7 @@ void ObstacleAvoid()
         stop();
     }
     else // Warning Zone and Safe Zone
-        speedControl(obstacle);
+        ObstacleAvoidanceTechnique(obstacle_avoidance_method, obstacle);
 }
 
 // incluir tratativas de erro?
@@ -320,7 +325,6 @@ void SensorSettings()
     USS[4].Bit = digitalPinToBitMask(echoPin4);
     USS[4].port = digitalPinToPort(echoPin4);
     USS[4].pointer = 4;
-    //TODO: change it back!!!
 }
 
 
@@ -331,30 +335,73 @@ void SensorSettings()
 */
 int myPulseIn( bool dynamical_reading)
 {
-    /*TODO:
-     * 1) check if it's possible to analyze all sensors at once:  *portInputRegister(USS[i].port)
-     * 2) guarantee that micros() won't overflow during execution!!!
-     */
-
+/*TODO:
+ * 1) check if it's possible to analyze all sensors at once:  *portInputRegister(USS[i].port)
+ * 2) guarantee that micros() won't overflow during execution!!!
+ */
     unsigned long initTime = millis();
 
     boolean finished = LOW; // finished reading all sensors data flag
     boolean previous_pulse[5]; // auxiliar variable that states if previous pulse has already ended or not.
     boolean reading[5];  // auxiliar variable that states if data is being read or not.
 
-    for(int i = 0; i < 5; i++)
-    {
-        reading[i] = LOW;
-        previous_pulse[i] = LOW;
+    reading[0] = LOW;
+    previous_pulse[0] = LOW;
 
-        USS[i].data_available = LOW;
-        USS[i].duration = 0;
+    reading[1] = LOW;
+    previous_pulse[1] = LOW;
 
-        if(USS[i].pointer == 4)
-            USS[i].pointer = 0;
-        else
-            USS[i].pointer = USS[i].pointer + 1;
-    }
+    reading[2] = LOW;
+    previous_pulse[2] = LOW;
+
+    reading[3] = LOW;
+    previous_pulse[3] = LOW;
+
+    reading[4] = LOW;
+    previous_pulse[4] = LOW;
+
+
+    //	processing distance, so state is set to LOW and duration initialized 0.
+    USS[0].data_available = LOW;
+    USS[0].duration = 0;
+
+    USS[1].data_available = LOW;
+    USS[1].duration = 0;
+
+    USS[2].data_available = LOW;
+    USS[2].duration = 0;
+
+    USS[3].data_available = LOW;
+    USS[3].duration = 0;
+
+    USS[4].data_available = LOW;
+    USS[4].duration = 0;
+
+    // adjusting pointer
+    if(USS[0].pointer == 4)
+        USS[0].pointer = 0;
+    else
+        USS[0].pointer = USS[0].pointer + 1;
+
+    if(USS[1].pointer == 4)
+        USS[1].pointer = 0;
+    else
+        USS[1].pointer = USS[1].pointer + 1;
+
+    if(USS[2].pointer == 4)
+        USS[2].pointer = 0;
+    else
+        USS[2].pointer = USS[2].pointer + 1;
+
+    if(USS[3].pointer == 4)
+        USS[3].pointer = 0;
+    else
+        USS[3].pointer = USS[3].pointer + 1;
+
+    if(USS[4].pointer == 4)
+        USS[4].pointer = 0;
+    else
+        USS[4].pointer = USS[4].pointer + 1;
 
     // trigger
     digitalWrite(trigPin, LOW);
@@ -363,55 +410,192 @@ int myPulseIn( bool dynamical_reading)
     delayMicroseconds(10);
     digitalWrite(trigPin, LOW);
 
-    while (!finished) // wait for echo
+    // wait for echo
+    while (!finished)
     {
-        for(int i = 0; i < 5; i++)
+        if (!(USS[0].data_available)) // if data hasn't already been read
         {
-            if (!(USS[i].data_available)) // if data hasn't already been read
+            if (previous_pulse[0]) // if previous pulse has ended
             {
-                if (previous_pulse[i]) // if previous pulse has ended
+                if (reading[0]) // if data is being read
                 {
-                    if (reading[i]) // if data is being read
+                    // if data has just finished being read
+                    if ((*portInputRegister(USS[0].port) & USS[0].Bit) != USS[0].Bit)
                     {
-                        // if data has just finished being read
-                        if ((*portInputRegister(USS[i].port) & USS[i].Bit) != USS[i].Bit)
-                        {
-                            USS[i].duration = micros() - USS[i].duration;
-                            USS[i].distance[USS[i].pointer] = USS[i].duration / 58.2;
-                            USS[i].data_available = HIGH;
-                        }
-                    }
-                    else // if data hasn't started to be read
-                    {
-                        // check if it has just started.
-                        if ((*portInputRegister(USS[i].port) & USS[i].Bit) == USS[i].Bit)
-                        {
-                            USS[i].duration = micros();
-                            reading[i] = HIGH;
-                        }
+                        USS[0].duration = micros() - USS[0].duration;
+                        USS[0].distance[USS[0].pointer] = USS[0].duration / 58.2;
+                        USS[0].data_available = HIGH;
                     }
                 }
-                else
+                else // if data hasn't started to be read
                 {
-                    // check if previous pulse has just ended and set previous_pulse if it has.
-                    if ((*portInputRegister(USS[i].port) & USS[i].Bit) != USS[i].Bit)
-                        previous_pulse[i] = HIGH;
+                    // check if it has just started.
+                    if ((*portInputRegister(USS[0].port) & USS[0].Bit) == USS[0].Bit)
+                    {
+                        USS[0].duration = micros();
+                        reading[0] = HIGH;
+                    }
                 }
+            }
+            else
+            {
+                // check if previous pulse has just ended and set previous_pulse if it has.
+                if ((*portInputRegister(USS[0].port) & USS[0].Bit) != USS[0].Bit)
+                    previous_pulse[0] = HIGH;
+            }
+        }
+
+        if (!(USS[1].data_available)) // if data hasn't already been read
+        {
+            if (previous_pulse[1]) // if previous pulse has ended
+            {
+                if (reading[1]) // if data is being read
+                {
+                    // if data has just finished being read
+                    if ((*portInputRegister(USS[1].port) & USS[1].Bit) != USS[1].Bit)
+                    {
+                        USS[1].duration = micros() - USS[1].duration;
+                        USS[1].distance[USS[1].pointer] = USS[1].duration / 58.2;
+                        USS[1].data_available = HIGH;
+                    }
+                }
+                else // if data hasn't started to be read
+                {
+                    // check if it has just started.
+                    if ((*portInputRegister(USS[1].port) & USS[1].Bit) == USS[1].Bit)
+                    {
+                        USS[1].duration = micros();
+                        reading[1] = HIGH;
+                    }
+                }
+            }
+            else
+            {
+                // check if previous pulse has just ended and set previous_pulse if it has.
+                if ((*portInputRegister(USS[1].port) & USS[1].Bit) != USS[1].Bit)
+                    previous_pulse[1] = HIGH;
+            }
+        }
+
+        if (!(USS[2].data_available)) // if data hasn't already been read
+        {
+            if (previous_pulse[2]) // if previous pulse has ended
+            {
+                if (reading[2]) // if data is being read
+                {
+                    // if data has just finished being read
+                    if ((*portInputRegister(USS[2].port) & USS[2].Bit) != USS[2].Bit)
+                    {
+                        USS[2].duration = micros() - USS[2].duration;
+                        USS[2].distance[USS[2].pointer] = USS[2].duration / 58.2;
+                        USS[2].data_available = HIGH;
+                    }
+                }
+                else // if data hasn't started to be read
+                {
+                    // check if it has just started.
+                    if ((*portInputRegister(USS[2].port) & USS[2].Bit) == USS[2].Bit)
+                    {
+                        USS[2].duration = micros();
+                        reading[2] = HIGH;
+                    }
+                }
+            }
+            else
+            {
+                // check if previous pulse has just ended and set previous_pulse if it has.
+                if ((*portInputRegister(USS[2].port) & USS[2].Bit) != USS[2].Bit)
+                    previous_pulse[2] = HIGH;
+            }
+        }
+
+        if (!(USS[3].data_available)) // if data hasn't already been read
+        {
+            if (previous_pulse[3]) // if previous pulse has ended
+            {
+                if (reading[3]) // if data is being read
+                {
+                    // if data has just finished being read
+                    if ((*portInputRegister(USS[3].port) & USS[3].Bit) != USS[3].Bit)
+                    {
+                        USS[3].duration = micros() - USS[3].duration;
+                        USS[3].distance[USS[3].pointer] = USS[3].duration / 58.2;
+                        USS[3].data_available = HIGH;
+                    }
+                }
+                else // if data hasn't started to be read
+                {
+                    // check if it has just started.
+                    if ((*portInputRegister(USS[3].port) & USS[3].Bit) == USS[3].Bit)
+                    {
+                        USS[3].duration = micros();
+                        reading[3] = HIGH;
+                    }
+                }
+            }
+            else
+            {
+                // check if previous pulse has just ended and set previous_pulse if it has.
+                if ((*portInputRegister(USS[3].port) & USS[3].Bit) != USS[3].Bit)
+                    previous_pulse[3] = HIGH;
+            }
+        }
+
+        if (!(USS[4].data_available)) // if data hasn't already been read
+        {
+            if (previous_pulse[4]) // if previous pulse has ended
+            {
+                if (reading[4]) // if data is being read
+                {
+                    // if data has just finished being read
+                    if ((*portInputRegister(USS[4].port) & USS[4].Bit) != USS[4].Bit)
+                    {
+                        USS[4].duration = micros() - USS[4].duration;
+                        USS[4].distance[USS[4].pointer] = USS[4].duration / 58.2;
+                        USS[4].data_available = HIGH;
+                    }
+                }
+                else // if data hasn't started to be read
+                {
+                    // check if it has just started.
+                    if ((*portInputRegister(USS[4].port) & USS[4].Bit) == USS[4].Bit)
+                    {
+                        USS[4].duration = micros();
+                        reading[4] = HIGH;
+                    }
+                }
+            }
+            else
+            {
+                // check if previous pulse has just ended and set previous_pulse if it has.
+                if ((*portInputRegister(USS[4].port) & USS[4].Bit) != USS[4].Bit)
+                    previous_pulse[4] = HIGH;
             }
         }
 
         if (millis() > initTime + time_out)
         {
-            for(int i = 0; i < 5; i++) // if there is no echo, we assume there is nothing in front of us
-            {
-                if( !(USS[i].data_available) )
-                    USS[i].distance[USS[i].pointer] = outOfRange;
-            }
+            // if there is no echo, we assume there is nothing in front of us
+            if( !(USS[0].data_available) )
+                USS[0].distance[USS[0].pointer] = outOfRange;
+
+            if( !(USS[1].data_available) )
+                USS[1].distance[USS[1].pointer] = outOfRange;
+
+            if( !(USS[2].data_available) )
+                USS[2].distance[USS[2].pointer] = outOfRange;
+
+            if( !(USS[3].data_available) )
+                USS[3].distance[USS[3].pointer] = outOfRange;
+
+            if( !(USS[4].data_available) )
+                USS[4].distance[USS[4].pointer] = outOfRange;
             return 0;
         }
 
         finished =  USS[0].data_available &  USS[1].data_available &  USS[2].data_available &  USS[3].data_available & USS[4].data_available;
     }
+
 
     if(!dynamical_reading)
         while(millis() < initTime + time_out) ; // TODO: wasted time, find out something useful to do here.
@@ -426,8 +610,7 @@ rodas sem aderência. Não usar X_F
 
 void initTable(short int *T)
 {
-
-    T[B00000] = Frente; // FullSpeed;
+    T[B00000] = FullSpeed;
 
 /**/T[B00001] = E_F; // E_L;  
 
@@ -531,29 +714,161 @@ void speedControl(int obstacle)
 
 void getExtreamValues()
 {
-    for(int j = 0; j < 5; j++)
-    {
-        for(int i = 0; i < 5; i++)
-        {
-            if(j == 0)
-            {
-                USS[i].farthest = USS[i].distance[j];
-                USS[i].closest = USS[i].distance[j];
-                USS[i].mean = USS[i].distance[j];
-            }
-            else
-            {
-                if(USS[i].farthest < USS[i].distance[j])
-                    USS[i].farthest = USS[i].distance[j];
-                if(USS[i].closest > USS[i].distance[j])
-                    USS[i].closest = USS[i].distance[j];
-                USS[i].mean = USS[i].mean + USS[i].distance[j];
-            }
+    // 0
+    USS[0].farthest = USS[0].distance[0];
+    USS[0].closest = USS[0].distance[0];
+    USS[0].mean = USS[0].distance[0];
 
-            if(j == 4)
-                USS[i].mean = ( USS[i].mean - USS[i].farthest - USS[i].closest ) / 3;
-        }
-    }
+    USS[1].farthest = USS[1].distance[0];
+    USS[1].closest = USS[1].distance[0];
+    USS[1].mean = USS[1].distance[0];
+
+    USS[2].farthest = USS[2].distance[0];
+    USS[2].closest = USS[2].distance[0];
+    USS[2].mean = USS[2].distance[0];
+
+    USS[3].farthest = USS[3].distance[0];
+    USS[3].closest = USS[3].distance[0];
+    USS[3].mean = USS[3].distance[0];
+
+    USS[4].farthest = USS[4].distance[0];
+    USS[4].closest = USS[4].distance[0];
+    USS[4].mean = USS[4].distance[0];
+
+    // 1
+    if(USS[0].farthest < USS[0].distance[1])
+        USS[0].farthest = USS[0].distance[1];
+    if(USS[0].closest > USS[0].distance[1])
+        USS[0].closest = USS[0].distance[1];
+    USS[0].mean = USS[0].mean + USS[0].distance[1];
+
+    if(USS[1].farthest < USS[1].distance[1])
+        USS[1].farthest = USS[1].distance[1];
+    if(USS[1].closest > USS[1].distance[1])
+        USS[1].closest = USS[1].distance[1];
+    USS[1].mean = USS[1].mean + USS[1].distance[1];
+
+    if(USS[2].farthest < USS[2].distance[1])
+        USS[2].farthest = USS[2].distance[1];
+    if(USS[2].closest > USS[2].distance[1])
+        USS[2].closest = USS[2].distance[1];
+    USS[2].mean = USS[2].mean + USS[2].distance[1];
+
+    if(USS[3].farthest < USS[3].distance[1])
+        USS[3].farthest = USS[3].distance[1];
+    if(USS[3].closest > USS[3].distance[1])
+        USS[3].closest = USS[3].distance[1];
+    USS[3].mean = USS[3].mean + USS[3].distance[1];
+
+    if(USS[4].farthest < USS[4].distance[1])
+        USS[4].farthest = USS[4].distance[1];
+    if(USS[4].closest > USS[4].distance[1])
+        USS[4].closest = USS[4].distance[1];
+    USS[4].mean = USS[4].mean + USS[4].distance[1];
+
+    // 2
+    if(USS[0].farthest < USS[0].distance[2])
+        USS[0].farthest = USS[0].distance[2];
+    if(USS[0].closest > USS[0].distance[2])
+        USS[0].closest = USS[0].distance[2];
+    USS[0].mean = USS[0].mean + USS[0].distance[2];
+
+    if(USS[1].farthest < USS[1].distance[2])
+        USS[1].farthest = USS[1].distance[2];
+    if(USS[1].closest > USS[1].distance[2])
+        USS[1].closest = USS[1].distance[2];
+    USS[1].mean = USS[1].mean + USS[1].distance[2];
+
+    if(USS[2].farthest < USS[2].distance[2])
+        USS[2].farthest = USS[2].distance[2];
+    if(USS[2].closest > USS[2].distance[2])
+        USS[2].closest = USS[2].distance[2];
+    USS[2].mean = USS[2].mean + USS[2].distance[2];
+
+    if(USS[3].farthest < USS[3].distance[2])
+        USS[3].farthest = USS[3].distance[2];
+    if(USS[3].closest > USS[3].distance[2])
+        USS[3].closest = USS[3].distance[2];
+    USS[3].mean = USS[3].mean + USS[3].distance[2];
+
+    if(USS[4].farthest < USS[4].distance[2])
+        USS[4].farthest = USS[4].distance[2];
+    if(USS[4].closest > USS[4].distance[2])
+        USS[4].closest =+ USS[4].distance[2];
+    USS[4].mean = USS[4].mean + USS[4].distance[2];
+
+    // 3
+    if(USS[0].farthest < USS[0].distance[3])
+        USS[0].farthest = USS[0].distance[3];
+    if(USS[0].closest > USS[0].distance[3])
+        USS[0].closest = USS[0].distance[3];
+    USS[0].mean = USS[0].mean + USS[0].distance[3];
+
+    if(USS[1].farthest < USS[1].distance[3])
+        USS[1].farthest = USS[1].distance[3];
+    if(USS[1].closest > USS[1].distance[3])
+        USS[1].closest = USS[1].distance[3];
+    USS[1].mean = USS[1].mean + USS[1].distance[3];
+
+    if(USS[2].farthest < USS[2].distance[3])
+        USS[2].farthest = USS[2].distance[3];
+    if(USS[2].closest > USS[2].distance[3])
+        USS[2].closest = USS[2].distance[3];
+    USS[2].mean = USS[2].mean + USS[2].distance[3];
+
+    if(USS[3].farthest < USS[3].distance[3])
+        USS[3].farthest = USS[3].distance[3];
+    if(USS[3].closest > USS[3].distance[3])
+        USS[3].closest = USS[3].distance[3];
+    USS[3].mean = USS[3].mean + USS[3].distance[3];
+
+    if(USS[4].farthest < USS[4].distance[3])
+        USS[4].farthest = USS[4].distance[3];
+    if(USS[4].closest > USS[4].distance[3])
+        USS[4].closest =+ USS[4].distance[3];
+    USS[4].mean = USS[4].mean + USS[4].distance[3];
+
+    // 4
+    if(USS[0].farthest < USS[0].distance[4])
+        USS[0].farthest = USS[0].distance[4];
+    if(USS[0].closest > USS[0].distance[4])
+        USS[0].closest = USS[0].distance[4];
+    USS[0].mean = USS[0].mean + USS[0].distance[4];
+
+    if(USS[1].farthest < USS[1].distance[4])
+        USS[1].farthest = USS[1].distance[4];
+    if(USS[1].closest > USS[1].distance[4])
+        USS[1].closest = USS[1].distance[4];
+    USS[1].mean = USS[1].mean + USS[1].distance[4];
+
+    if(USS[2].farthest < USS[2].distance[4])
+        USS[2].farthest = USS[2].distance[4];
+    if(USS[2].closest > USS[2].distance[4])
+        USS[2].closest = USS[2].distance[4];
+    USS[2].mean = USS[2].mean + USS[2].distance[4];
+
+    if(USS[3].farthest < USS[3].distance[4])
+        USS[3].farthest = USS[3].distance[4];
+    if(USS[3].closest > USS[3].distance[4])
+        USS[3].closest = USS[3].distance[4];
+    USS[3].mean = USS[3].mean + USS[3].distance[4];
+
+    if(USS[4].farthest < USS[4].distance[4])
+        USS[4].farthest = USS[4].distance[4];
+    if(USS[4].closest > USS[4].distance[4])
+        USS[4].closest = USS[4].distance[4];
+    USS[4].mean = USS[4].mean + USS[4].distance[4];
+
+
+    USS[0].mean = ( USS[0].mean - USS[0].farthest - USS[0].closest ) / 3;
+
+    USS[1].mean = ( USS[1].mean - USS[1].farthest - USS[1].closest ) / 3;
+
+    USS[2].mean = ( USS[2].mean - USS[2].farthest - USS[2].closest ) / 3;
+
+    USS[3].mean = ( USS[3].mean - USS[3].farthest - USS[3].closest ) / 3;
+
+    USS[4].mean = ( USS[4].mean - USS[4].farthest - USS[4].closest ) / 3;
 }
 
 int SensorReading()
@@ -1323,9 +1638,6 @@ void statusFeedback(char iteration)
                 case (Frente):
                     append(cmd,"Fr ");
                     break;
-                case (FullSpeed):
-                    append(cmd,"FS ");
-                    break;
             }
         else
             append(cmd,"OR ");
@@ -1553,27 +1865,17 @@ void writeSensorsData()
     int2char(aux,USS[4].mean);
     append(cmd,aux);
     append(cmd,"|");
-
     int2char(aux,USS[3].mean);
     append(cmd,aux);
-
     append(cmd,"|");
     int2char(aux,USS[2].mean);
     append(cmd,aux);
     append(cmd,"|");
-
     int2char(aux,USS[1].mean);
     append(cmd,aux);
-
     append(cmd,"|");
     int2char(aux,USS[0].mean);
     append(cmd,aux);
-    /*
-    append(cmd,":");
-    int2char(aux,USS[0].distance[USS[0].pointer]);
-    append(cmd,aux);
-    */
-
     append(cmd," ");
 }
 
@@ -1663,4 +1965,44 @@ void test()
                 t = millis();
         }
     }
+}
+
+
+
+void ObstacleAvoidanceTechnique(int obstacle_avoidance_method, int obstacle)
+{
+    switch(obstacle_avoidance_method)
+    {
+        case 0:
+            speedControl(obstacle);
+            break;
+        case 1:
+            proportionalController();
+            break;
+        default:
+            speedControl(obstacle);
+    }
+}
+
+void proportionalController()
+{
+    /*
+                            TODO
+        o sensor com menor valor lido sera levado em consideração, não a média
+        usa 3 pra esquerda e 2 pra direita
+        ACERTAR O PRINT DOS DADOS PARA QUE ELE RETORNE AS VELOCIDADES
+    */
+    char status[20], aux[5];
+    int leftSpeed = ( ( (USS[0].mean + USS[1].mean)/2 - 100 )*(avgSpeed_l - 120) )/(400 - 100);
+    int rightSpeed = ( ( (USS[3].mean + USS[4].mean)/2 - 100 )*(avgSpeed_r  - 100) )/(400 - 100);
+
+    pwmWrite(leftmotor, leftSpeed);
+    pwmWrite(rightmotor, rightSpeed);
+
+	int2char(aux,leftSpeed);
+    append(status,aux);
+	int2char(aux,rightSpeed);
+    append(status,aux);
+    write_ackPayload(status);
+
 }

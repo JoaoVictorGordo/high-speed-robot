@@ -1,0 +1,47 @@
+\chapter{Resultados}
+
+\section{Interferência dos BLDC nos Sonares}
+%% falar que as leituras foram estáticas e não dinâmicas. T = 60ms???
+Conforme introduzido na seção de Integração dos Subsistemas presente no capítulo de Métodos desta monografia, 
+constatou-se que os motores quando ligados causavam o acionamento indevido nos pinos de \textit{echo} de determinados sonares.
+Na depuração ficou evidente que a posição dos sensores ultrassônicos em relação aos BLDC é um fator determinante da intensidade desta interferência, 
+pois independente das ligações dos sonares na placa de prototipação Arduino o sensor mais afetado era sempre o que estava disposto num ângulo de 
+$45^o$ em relação ao eixo dos motores, no lado esquerdo do veículo, i.e. o segundo sensor da esquerda para a direita.
+
+Para documentar a existência desta interferência, foi feita uma modificação no \textit{software} para que somente os sensores frontais e laterais 
+fossem levados em consideração para efetuar o desvio de obstáculos, a fim de mitigar a mudança constante de velocidade nos motores em decorrência dos 
+erros de leitura nos sensores mais afetados, conforme  a Tabela \ref{tabela-interf}.
+
+O teste foi desenvolvido da seguinte maneira: com o veículo na mão e motores ligados reagindo às percepções obtidas do meio, caminhou-se com o 
+carrinho em diferentes condições externas a fim de catalogar a resposta dos sonares numa gama ampla das possibilidades que pudussem servir como um 
+espaço amostral relativamente completo das situações em que o veículo poderia passar quando navegando de maneira autônoma. 
+A fim de prover uma visualização melhor dos dados coletados, estes foram minerados e categorizados quanto à posição dos obstáculos em relação ao 
+veículo: sem obstáculos a frente \ref{OR}, com obstáculos à esquerda \ref{Df}, à direita \ref{Ef} e em ambos os lados \ref{FS}.
+
+\section{Leituras Espúrias nos Sonares}
+%% testes feitos com o veículo parado nas quais surgiam valores conflitantes
+Ao serem feitos testes unitários no \textit{software} de controle dos sensores ultrassônicos, notou-se a existência de leituras espúrias, sobretudo 
+em condições em que não havia obstáculos dentre da região visível do dispositivo.
+A fim de documentar o problema, posiciou-se o veículo num ângulo e distância conhecidos em relação a um obstáculo para em seguida medir as respostas 
+dos sonares; foram feitos diversos testes variando o ângulo e a distância dos obstáculos, incluindo o caso de não haver obstáculos dentro do 
+alcance de detecção dos sensores ultrassônicos, variou-se também o \textit{blanking time}.
+Os valores coletados constam nas Tabelas \ref{espurias-1}, \ref{espurias-2}.
+
+Podemos notar que não há uma correlação entre o \textit{dead time} e a aparição das leituras espúrias, o que motivou a adoção de intervalos dinâmicos 
+de leitura, isto é, o \textit{blanking time} corresponde ao intervalo do sonar que demorou mais a receber uma resposta no pino de \textit{echo} ou um 
+ valor máximo pré-determinado, caso não haja obstáculos ao alcance de algum deles.
+A solução concebida para remediar este problema foi basear o comportamento a ser adotado na média aritmética das últimas 5 leituras, excluindo os 
+valores extremos.
+%%% ----------------------------------------------------------------------------------------------------------------------------------------------
+\cite{jones}(página 149) vibração residual do trigger pode causar falsas leituras no echo, talvez esse seja o problema no caso de detecções dinâmicas 
+deixado de lado.
+
+\cite{siegwart} (páginas 126-127) talvez estendendo o \textit{blanking time} consigamos manter as detecções dinâmicas. Como fazer isso:
+\begin{itemize}
+ \item colocar um delay antes de entrar no loop
+ \item mexer diretamente no myPulsein() para garantir medidas abaixo de 5 cm não sejam processadas trabalhando nos IFs. 
+\end{itemize}
+
+ While comparison of consecutive readings is an efficient way for rejecting external
+ erroneous readings, it is unsuitable for reducing crosstalk. \cite{2016_artigo_1}
+

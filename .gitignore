@@ -29,4 +29,14 @@
 *.hex
 
 # Debug files
+*.log
+*.lof
+*.lot
+*.dvi
+*.ps
+*.blg
+*.idx
+*.toc
+*.backup
+*.aux
 *.dSYM/
