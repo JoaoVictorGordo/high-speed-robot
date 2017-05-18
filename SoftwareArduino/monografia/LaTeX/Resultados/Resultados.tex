@@ -1,24 +1,17 @@
 \chapter{Resultados}
 
-\section{Interferência dos BLDC nos Sonares}
-%% falar que as leituras foram estáticas e não dinâmicas. T = 60ms???
-Conforme introduzido na seção de Integração dos Subsistemas presente no capítulo de Métodos desta monografia, 
-constatou-se que os motores quando ligados causavam o acionamento indevido nos pinos de \textit{echo} de determinados sonares.
-Na depuração ficou evidente que a posição dos sensores ultrassônicos em relação aos BLDC é um fator determinante da intensidade desta interferência, 
-pois independente das ligações dos sonares na placa de prototipação Arduino o sensor mais afetado era sempre o que estava disposto num ângulo de 
-$45^o$ em relação ao eixo dos motores, no lado esquerdo do veículo, i.e. o segundo sensor da esquerda para a direita.
+\section{Testes Unitários}
 
-Para documentar a existência desta interferência, foi feita uma modificação no \textit{software} para que somente os sensores frontais e laterais 
-fossem levados em consideração para efetuar o desvio de obstáculos, a fim de mitigar a mudança constante de velocidade nos motores em decorrência dos 
-erros de leitura nos sensores mais afetados, conforme  a Tabela \ref{tabela-interf}.
+\subsection{Intervalo de Medição Dinâmico}
+A fim de verificar a viabilidade de impregar-se intervalos dinâmicos na percepão do veículo, este foi disposto em diferentes posições nas quais todos 
+os sonares apresentavam obstáculos visíveis, foram realizadas medições dinâmicas e estáticas, esta última com três intervalos distintos: 30ms, 45ms e 
+60ms. Em cada uma das medições foram armazenadas 150 leituras ininterruptas armazenadas em um \textit{buffer} local que, ao ser preenchido, cessava 
+o acionamento dos sonares e imprimia os dados via interface serial antes de começar a próxima medição. 
+Nos dados obtidos em cada uma dessas medições foram feitos cálculos de média e desvio padrão sujos e limpos\footnote{foram consideradas medidas 
+limpas aquelas cuja métrica foi calculada descartando-se as leituras em que o respectivo sonar não encontrou o obstáculo}, contagem dos resultados 
+que desviassem em mais do que quatro vezes o desvio padrão em relação à média limpa das leituras.
 
-O teste foi desenvolvido da seguinte maneira: com o veículo na mão e motores ligados reagindo às percepções obtidas do meio, caminhou-se com o 
-carrinho em diferentes condições externas a fim de catalogar a resposta dos sonares numa gama ampla das possibilidades que pudussem servir como um 
-espaço amostral relativamente completo das situações em que o veículo poderia passar quando navegando de maneira autônoma. 
-A fim de prover uma visualização melhor dos dados coletados, estes foram minerados e categorizados quanto à posição dos obstáculos em relação ao 
-veículo: sem obstáculos a frente \ref{OR}, com obstáculos à esquerda \ref{Df}, à direita \ref{Ef} e em ambos os lados \ref{FS}.
-
-\section{Leituras Espúrias nos Sonares}
+\subsection{Leituras Espúrias nos Sonares}
 %% testes feitos com o veículo parado nas quais surgiam valores conflitantes
 Ao serem feitos testes unitários no \textit{software} de controle dos sensores ultrassônicos, notou-se a existência de leituras espúrias, sobretudo 
 em condições em que não havia obstáculos dentre da região visível do dispositivo.
@@ -32,6 +25,37 @@ de leitura, isto é, o \textit{blanking time} corresponde ao intervalo do sonar 
  valor máximo pré-determinado, caso não haja obstáculos ao alcance de algum deles.
 A solução concebida para remediar este problema foi basear o comportamento a ser adotado na média aritmética das últimas 5 leituras, excluindo os 
 valores extremos.
+
+\section{Testes de Integração}
+\subsection{Interferência dos BLDC nos Sonares}
+Notou-se que em determinadas condições o robô ia de encontro ao obstáculo ao invés de efetuar o desvio. 
+Após serem analisados os dados dos sensores nessas circunstâncias, observou-se a existência de ruídos em sensores específicos, que causavam a adoção 
+destes comportamentos errados.
+
+Ao perceber o problema, novos testes foram engendrados a fim de descobrir a natureza da falha.
+As hipóteses concebidas eram as seguintes: \textit{crosstalk}, curto circuito entre pinos do Arduino, falha na lógica do \textit{software} ou 
+interferência dos motores nos sensores.
+
+Para eliminar a possibilidade de que uma das portas da placa de prototipação estivesse interferindo na outra de alguma maneira, mudou-se a 
+ligação dos sensores ultrassônicos e o problema se manteve.
+O mesmo foi feito no \textit{software}, i.e. foi alterada a disposição dos sensores ultrassônicos no código. 
+Especificamente falando, foram trocados os parâmetros que correlacionam a ligação física do pino de \textit{echo} dos dispositivos à sua variável 
+correspondente na matriz de estruturas do tipo \textit{sensor\_t}, denominada no programa por USS, e, mais uma vez, o defeito persistiu.
+Adicionalmente a essa modificação no \textit{software}, foram feitas medições com os motores desligados, nas quais a falha em questão não ocorreu, 
+evidenciando que a natureza do problema não era do código.
+
+O teste seguinte consistiu em desacoplar os sensores ultrassônicos da carcaça do veículo e ligar os motores com os sonares sendo segurados na mão, o 
+no resultado observou-se a desaparição das leituras espúrias, confirmando a hipótese de que os BLDC causavam a distorção na percepção do robô.
+Em vista disso, supôs-se que a natureza da interferência seria em razão da proximidade entre os dispositivos, como interferência eletromagnética nos 
+pinos de \textit{echo} dos sonares ou então de ondas acústica na banda de funcionamento do sensor, e optou-se por erguer os sensores a uma altura 
+na qual não houvesse interferência suficiente a ponto de provocar erros de medição.
+
+Após terem sido feitas as devidas modificações, foi engendrado um novo teste a fim de constatar se com a nova disposição o problema havia sido 
+sanado: cada uma das combinações de velocidades dos motores foi mantida por dez segundos enquanto os sonares faziam as medições.
+Os dados obtidos, vide Tabela \ref{tabela-interf}, apontaram que o problema persistia; enquanto era realizado o teste, notou-se que os fios oscilavam
+ em decorrência da vibração dos motores, o que levou a cogitar a hipótese de que essa seria de fato a natureza da interferência entre os sensores 
+ultrassônicos e os motores.
+
 %%% ----------------------------------------------------------------------------------------------------------------------------------------------
 \cite{jones}(página 149) vibração residual do trigger pode causar falsas leituras no echo, talvez esse seja o problema no caso de detecções dinâmicas 
 deixado de lado.

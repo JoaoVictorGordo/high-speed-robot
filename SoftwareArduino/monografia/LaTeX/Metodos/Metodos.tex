@@ -51,12 +51,14 @@ Em seguida, foi construída a matriz de sensores que, conforme a Fig. \ref{fritz
 entanto, a priori, a leitura dos sonares era feita sequencialmente utilizando o código citado.
 O próximo passo, naturalmente, foi fazer com que os cinco sensores fossem lidos paralelamente, aproveitando o fato de todos dispararem juntos, a fim 
 de minimizar o tempo de resposta na leitura da matriz.
+Em seguida, a fim de reduzir a latência inerente dos sensores ultrassônicos, optou-se por implementar intervalos dinâmicos de medição, isto é, o 
+tempo gasto na percepção dependeria do meio no qual o veículo está inserido.  
 
 Foram feitos testes mais rigorosos nessa última configuração com o objetivo de certificar se há de fato a necessidade de estipular um intervalo 
-mínimo entre leituras sucessivas dos sonares ou se seria possível que esta latência fosse dinâmica, atrelada ao sensor cujo obstáculo encontra-se mais 
-distante.
+mínimo entre leituras sucessivas dos sonares ou se seria possível que esta latência fosse dinâmica, atrelada ao sensor cujo obstáculo detectado 
+encontra-se mais distante.
 Em suma, foi verificado se ciclos de leitura menores do que os 60ms sugeridos em \cite{HC-SR04} realmente ocasionam aumento na incidência de erros 
-nas medidas; os detalhes acerca destes testes constam na seção de resultados.
+nas medidas. Os detalhes acerca destes testes constam na seção de resultados.
 
 A decisão de disparar todos os sonares simultaneamente foi feita com o intuito de reduzir o número de portas utilizadas no Arduino, assim como 
 aumentar a taxa de obtenção dos dados, i.e. a largura de banda, conforme a terminologia adotada  em \cite{roseli}.
@@ -133,25 +135,4 @@ caracterizam o quão acentuada vai ser a curva: leve, moderada ou fortemente. % 
 Assim que todos os subsistemas foram implementados, testados e operavam isoladamente de maneira satisfatória, foram feitos testes no conjunto, que 
 indicaram novos problemas a serem tratados. 
 A maioria deles de ordem prática e facilmente contornáveis, no entanto um é digno de nota, pois implicou em uma mudança na disposição física dos 
-componentes do veículo.
-
-Foi notado que em determinadas condições o robô ia de encontro ao obstáculo ao invés de efetuar o desvio. 
-Após serem analisados os dados dos sensores nessas circunstâncias, observou-se a existência de ruídos em sensores específicos, que causavam a adoção 
-destes comportamentos errados.
-
-Ao perceber o problema, novos testes foram engendrados a fim de descobrir a natureza da falha.
-As hipóteses concebidas eram as seguintes: \textit{crosstalk}, curto circuito entre pinos do Arduino, falha na lógica do \textit{software} ou 
-interferência dos motores nos sensores.
-
-Para eliminar a possibilidade de que uma das portas da placa de prototipação estivesse interferindo na outra de alguma maneira, mudou-se a 
-ligação dos sensores ultrassônicos e o problema se manteve.
-O mesmo foi feito no \textit{software}, i.e. foi alterada a disposição dos sensores ultrassônicos no código. 
-Especificamente falando, foram trocados os parâmetros que correlacionam a ligação física do pino de \textit{echo} dos dispositivos à sua variável 
-correspondente na matriz de estruturas do tipo \textit{sensor\_t}, denominada no programa por USS, e, mais uma vez, o defeito persistiu.
-Adicionalmente a essa modificação no \textit{software}, foram feitas medições com os motores desligados, nas quais a falha em questão não ocorreu, 
-evidenciando que a natureza do problema não era do código.
-
-O último teste realizado consistiu em afastar os sensores ultrassônicos dos motores, o que resultou na desaparição das leituras espúrias, confirmando 
-a hipótese de que os BLDC causavam a distorção na percepção do robô.
-Para sanar essa questão, optou-se por erguer os sensores a uma altura na qual não houvesse interferência suficiente a ponto de provocar erros de 
-medição.
+componentes do veículo que acabou não solucionando o problema. Maiores detalhes, vide seção de Resultados.
