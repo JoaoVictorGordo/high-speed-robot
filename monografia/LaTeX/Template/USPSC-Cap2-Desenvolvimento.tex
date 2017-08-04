@@ -1,0 +1,454 @@
+\chapter[Embasamento Teórico]{Embasamento Teórico}
+\section{Sistemas Reativos}
+\epigraph{ 
+	  \textit{``Representações explícitas e modelos atrapalham. No fim das contas, a melhor representação do mundo é ele mesmo.''} 
+	 }
+	  { Brooks, R.A \cite{brooks} - tradução livre -} 
+	  
+%   \begin{flushright}
+% 	  \textit{``Representações explícitas e modelos atrapalham.\\
+% 	  No fim das contas, a melhor representação \\
+% 	  do mundo é ele mesmo.", Brooks, R.A. 
+% 	  \cite{brooks} \footnote{tradução livre}}
+%   \end{flushright}
+
+\subsection{Paradigma Reativo como Robótica Bioinspirada} 
+
+De acordo com Rodney Brooks \cite{brooks}, para o desenvolvimento da inteligência no seu sentido mais estrito e genuíno, são condições 
+suficientes que o indivíduo, que denominaremos agente, tenha as seguintes faculdades: mobilidade dentro de um ambiente dinâmico no qual esteja 
+inserido, percepção do que se passa nas suas adjacências e, por fim, manutenção da própria sobrevivência.
+Em suma, habilidades como o raciocinar, comunicar-se e gerar conhecimento nada mais são do que comportamentos complexos, consequências simples do 
+fato 
+de existirmos e do nosso poder de reação dentro do meio em que vivemos.
+
+Para aprofundarmos a discussão e esclarecermos como se daria esse processo de aprimoramento dos agentes, é preciso fornecer uma  definição 
+mais rigorosa do termo ``comportamento''.
+Em tradução livre: ``comportamentos são mapeamentos diretos de informações sensoriais recebidas em  
+padrões de ações motoras, desempenhadas para se cumprir uma tarefa. Matematicamente, seria uma função transferência que transforma dados dos 
+sensores em comandos para os atuadores'' \cite{murphy}.
+
+Nos animais, a transformação de percepção em ação está subordinada à existência de estímulos específicos de natureza interna ou externa 
+ao agente que podem ser entendidos como sinais de controle, permitindo ou inibindo determinados comportamentos \cite{murphy}.
+A título de ilustração: ao avistar uma presa - informação sensorial - o predador somente a ataca - comportamento - caso esteja com fome - estímulo 
+interno; ou quando afastamos a mão - comportamento - ao tocarmos uma panela quente - a informação sensorial seria a temperatura da panela enquanto o 
+estímulo externo é o fato de que ela excede uma dada temperatura.
+
+Com base em estudos da etologia, os comportamentos dos animais podem ser inatos ou aprendidos, e a sua inteligência pode ser decomposta verticalmente 
+em camadas de comportamentos, cada qual acessa os sensores e atuadores do agente de maneira independente das demais \cite{murphy}.
+Isto é, o indivíduo inicia sua existência com um conjunto de comportamentos inatos de autopreservação mas, ao longo da sua vida, outros 
+novos vão surgindo, podendo: refinar comportamentos pré-existentes, negá-los (completamente) ou agregar a eles sem produzir conflitos, 
+i.e. trabalhando paralelamente com os que lhe são ancestrais.
+Desta forma, os dois primeiros casos podem ser entendidos como uma reutilização de camadas inferiores da inteligência, enquanto o 
+último consiste na adição de mais uma camada.
+
+\subsection{Características}
+Por estar embasado em ideias da etologia discutidas na seção anterior, o paradigma reativo simplesmente desconsidera a etapa de planejamento 
+existente na tríade 'percepção, planejamento, ação', que sumariza o ciclo de tarefas realizadas por um sistema sob o paradigma hierárquico 
+\cite{murphy,roseli}.
+Em suma, os comportamentos se dão de acordo com o que o agente percebe que está acontecendo no seu entorno, não são feitas modelagens ou 
+representações do ambiente externo, apenas medições locais e orientadas a comportamentos.
+
+Em decorrência da exclusão da etapa de planejamento, robôs desenvolvidos sob o paradigma reativo costumam ser simples e apresentam 
+respostas rápidas \cite{roseli}.
+Com boas práticas de projeto é possível construir um robô com: alta coesão, pois comportamentos podem ter acesso direto aos sensores de que 
+necessitam para tomar suas decisões - o que possibilita um alto grau de independência em relação a operações e dados externos entre diferentes 
+módulos 
+ou subsistemas do robô; e baixo acoplamento, pois comportamentos são independentes entre si e, portanto, há pouca ou nenhuma dependência de ligações 
+e 
+interfaces externas a um dado módulo \cite{murphy}.
+
+% TODO: \subsection{Arquitetura de Subsumpção}
+
+\section{Arquitetura MOSA}
+
+Arquitetura que propõe dividir o sistema aéreos de navegação autônoma em dois módulos: aeronave e MOSA \cite{mosa_proposal}.
+
+O primeiro constitui a porção crítica do sistema embarcado, i.e. segmento cuja falha pode resultar em ao menos um dos seguintes desastres: morte 
+ou lesão de pessoas; destruição ou danos a propriedades, patrimônios ou equipamentos; danos ambientais \cite{safety}.
+Veículos Aéreos Não Tripulados, VANTs, apresentam a tolerância de um erro grave a cada $10^5$ ou $10^9$ horas de voo \cite{hard}, o que os 
+caracteriza
+como sistemas computacionais de tempo real do tipo \textit{hard}. 
+Maiores esclarecimentos acerca destes jargões podem ser encontrados no apêndice.
+
+O segundo corresponde à parte não crítica à segurança, encarregada do controle da navegação e, por conseguinte, da determinação da maior parte dos 
+parâmetros de voo. É caracterizado como um conjunto de sensores inteligentes capazes de cumprir uma missão específica, ou seja, 
+existe uma relação biunívoca entre missão e MOSA, dado que ele consiste no melhor arranjo de sensores para o cenário em questão. Neste contexto, a 
+aeronave é vista unicamente como o meio de transporte dos sensores, enquanto que o módulo MOSA constituiria o \textquoteleft cérebro\textquoteright{}  
+da plataforma, responsável pelo cumprimento da missão e por guiar a aeronave até a sua realização.
+
+%  \begin{figure}[h]
+%   \includegraphics[scale=0.5]{./Resources/MOSA.png}
+%   \caption{MOSA} \label{MOSA}
+%  \end{figure}
+
+No entanto, como a aeronave é o elemento responsável pela garantia da segurança, cabe a ela acatar ou não os comandos do MOSA. E pode, inclusive, 
+optar por readaptar a missão em tempo de voo para se ajustar ao cenário, o que inclui a seleção dos sensores que melhor se encaixam na dada 
+conjuntura.
+
+Isso se dá através de uma matriz de reconfiguração dinamicamente adaptável denominada \textit{Knowledge Based Framework}, seu papel é comparável à 
+expertise de um piloto.
+Ou seja, um elemento inteligente capaz de escolher o melhor serviço  a ser executado com base em regras e critérios de seleção, tais quais resposta 
+em tempo 
+real, segurança e performance.
+
+
+% diferentes missões, definidas pelo mosa e diferentes sensores, podem ser integrados, possibilitando a escolha do melhor arranjo de sensores que se 
+% ajuste ao cenário de utilização do sistema. este é o mecanismo básico do mosa, fazendo com que a missão possa ser adaptativa. durante uma missão, 
+% com 
+% base em uma matriz de reconfiguração o vant pode se adaptar dinamicamente às características da missão, escolhendo os sensores que melhor se 
+% encaixam 
+% dependendo da situação. além do hardware, um sistema mosa deve contemplar também o software capaz de realizar uma missão, comunicar-se com todos os 
+% sensores que o compõe, enviar e receber dados para a aeronave .
+% 
+% o sistema mosa deve ser capaz de determinar se a missão prevista pode ou não ser realizada.
+% 
+% the aircraft can, for safety reasons, not follow the flight sensors
+% commands, eventually terminating the flight
+% 
+% flight sensors can provide data for mission controllers but aircraft
+% % % % % % % % controllers must not use data provided by mission sensors
+
+
+\chapter{Materiais}
+\begin{itemize} %% TODO: colocar as rodas: http://www.hobbyking.com/hobbyking/store/__2176__598__Hardware_Accessories-Wheels_0_40mm.html
+ \item 5 sensores ultrassônicos de distância HC-SR04
+ \item 2 motores \textit{brushless outrunner} Turnigy D2836/9 950KV
+ \item 2 ESCs Hobby King com UBEC de 5.5V/4A: um de 35A e outro de 40A 
+ \item 2 módulos de rádio frequência baseados no \textit{transceiver} Nordic nRF24L01+ 
+ \item 1 bateria LiPo 30C de 2800 mAh
+ \item 2 Arduino Pro Mini
+ \item 1 Conversor/Adaptador USB-Serial PL2303
+ \item 1 Carregador balanceador de bateria IMAX B6-AC
+\end{itemize}
+
+\section{Motor \textit{Brushless}}
+São motores síncronos\footnote{Motores Síncronos: o campo magnético girante do rotor e do estator têm a mesma frequência.} de corrente contínua cuja 
+comutação é feita eletronicamente, e não mecanicamente por meio de escovas como nos motores CC comuns, por isso denominados \textit{brushless}.
+Possui aplicações nas indústrias de automóveis, aeroespacial, médica, de equipamentos de automação industrial e instrumentação .
+Os motores BLDC apresentam algumas vantagens em relação aos de corrente contínua com escovas e de indução no que concerne a: resposta 
+dinâmica, ruídos 
+de operação, durabilidade (i.e. vida útil), assim como razão do torque pelas dimensões do motor \cite{motor_2}. 
+
+% TODO tava uma merda, reler pois alterei um pouco
+O rotor consiste de um imã permanente, já os pólos do estator são formados por enrolamentos, que precisam ser energizados na sequência correta 
+para que um campo magnético girante seja criado.
+Nas máquinas CC isto é feito mecanicamente através das escovas mas, no caso do BLDC, é preciso que a posição do rotor em relação ao estator seja 
+conhecida para que seja possível fazer o acionamento correta das bobinas.
+Existem dois meios de se obter esta informação: através de sensores de efeito hall, método empregado neste trabalho, ou processamento da força contra 
+eletromotriz das bobinas do estator.
+
+Sensores de efeito Hall são transdutores analógicos que relacionam a intensidade do campo magnético externo transversalmente disposto a ele em termos 
+de tensão elétrica. Quando associado a um circuito comparador \textit{schmitt trigger}, comportam-se como um sensor digital que aponta quando a 
+intensidade do campo magnético atinge um valor de limiar pré-determinado. Ao dispor sensores deste tipo ao longo do estator, torna-se possível uma 
+estimativa da posição do rotor ao ser feito um estudo comparativo da resposta de cada sensor, cruzando esta informação com a posição que 
+cada um destes se encontra em relação ao estator \cite{motor_1}.
+
+Há a possibilidade de fazer a comutação sem empregar qualquer tipo de sensor, logo, trata-se de um método mais barato. 
+Nesse caso, a estimativa da posição do rotor se dá através do processamento das forças contra-eletromotriz de cada um dos enrolamentos do estator.
+No entanto, algumas limitações surgem: o motor deve operar acima de uma dada rotação, caso contrário o método não funciona; mudanças bruscas de carga 
+não podem ocorrer; há discontinuidades na resposta do motor quando operando em velocidades acima da taxa de comutação ideal \cite{motor_1}.
+
+\section{ESC}
+Controlador responsável por processar as informações oriundas dos sensores de efeito Hall do motor BLDC e providenciar o acionamento correto 
+dos enrolamentos do estator para que a velocidade angular se dê de acordo com o sinal de controle que é enviado a este dispositivo.
+No caso dos ESCs utilizados no presente trabalho, este sinal de controle é feito utilizando-se modulação por largura de pulso, i.e. PWM. 
+A frequência de operação varia de acordo com o modelo do controlador e para o caso deste projeto é de 400Hz.
+%% TODO: \cite{carlson}
+%% TODO: fazer uma descrição mais rica de como funciona este dispositivo.
+%% TODO: citar que toda a programação do ESC é feita via pwm.
+\section{Sensor Ultrassônico}
+
+\subsection{Princípio de Funcionamento}
+Utiliza o método \textit{time of flight}, que consiste na medição do intervalo de tempo, igualmente denominado \textit{time of flight}, que uma onda 
+ou partícula leva para percorrer uma determinada distância em um dado meio. 
+Pode ser utilizado para medir: distância, velocidade \cite{TOF_velocity}e propriedades do meio de propagação ou da partícula propagante
+\cite{TOF_medium1,TOF_medium2}.
+
+Para medidores de proximidade, como é o caso de sonares e lasers, um transdutor emissor faz a conversão do sinal elétrico, denominado 
+\textit{trigger}, em um pulso de ondas (acústicas para o caso do sonar e eletromagnéticas para o laser), dando início à medição de tempo.
+Quando esta onda propagante encontra um objeto que a reflita de volta ao sensor e a intensidade deste sinal recebido, denominado \textit{echo}, está 
+acima de um determinado valor de limiar, o transdutor receptor envia um sinal elétrico que interrompe a contagem de tempo, obtendo-se 
+assim a medida do \textit{time of flight}, $\tau$.
+Com isso, supondo que a velocidade de propagação, $\nu$, desta onda no meio seja conhecida. De acordo com \cite{siegwart}, pode-se 
+calcular a distância, $\Delta$, entre o sensor e o objeto que reflete o pulso de ondas pela equação \ref{TOF_eq}:
+\begin{equation}
+ \label{TOF_eq}
+ \Delta = \frac{\nu \times \tau }{2}
+\end{equation}
+
+Quanto ao sensor ultrassonico especificamente, temos que as ondas sonoras utilizadas estão usualmente situadas entre 40kHz e 180kHz, sendo 
+emitidas no formato de pacotes compostos por uma série de pulsos; no caso do sonar utilizado neste trabalho, 8 pulsos de 40kHz. 
+Por se tratarem de ondas mecânicas, é importante que a tensão de limiar, do inglês \textit{threshold}, comporte-se ao longo do ciclo de 
+leitura da seguinte forma \cite{siegwart}: 
+durante o período denominado \textit{blanking time}\cite{siegwart}  ou \textit{dead time}\cite{murphy}, o qual engloba o intervalo de 
+emissão das ondas sonoras até o momento em que o diafragma para de oscilar (o que pode constituir alguns milisegundos após a cessação do sinal de 
+\textit{trigger}), a tensão de limiar é muito alta no intuito de eliminar leituras inválidas decorrentes de interferência entre emissor e receptor; em 
+seguida, a tensão de \textit{threshold} se reduz a um valor que permita a detecção de obstáculos e vai sendo continuamente decrementada com o passar 
+do tempo. 
+Isso se dá pelo fato de que a intensidade do sinal acústico, i.e. potência por ângulo sólido, sofre atenuações atmosféricas que variam com a 
+distância percorrida, conforme a equação \ref{Atm_Attenuation} \cite{everett}, que leva em consideração somente efeitos da divergência esférica e 
+absorção molecular.
+\begin{equation}
+ \label{Atm_Attenuation}
+ I = \frac{ I_0 e^{-2 \alpha R} }{4 \pi R^2}
+\end{equation}
+Em que: $\alpha$ é o coeficiente de atenuação do meio, associado às absorções moleculares, o qual varia em função da frequência da onda emitida 
+assim como de propriedades do meio, e.g. umidade e poeira contida no ar.
+Para ondas de 40kHz: $\unitfrac[0,197]{dB}{m} < \alpha <  \unitfrac[0,295]{dB}{m}$. % TODO posso deixar essa desigualdade aqui???
+
+\subsection{Limitações}
+
+\subsubsection{Variação na velocidade de propagação da onda acústica}
+Como citado anteriormente, a medição da distância pressupõe que a velocidade de propagação da onda no meio é conhecida. 
+No entanto, mudanças na temperatura e umidade do fluido em que a onda se propaga podem causar erros de medida não desprezíveis \cite{everett}.
+
+\subsubsection{Direcionalidade}
+O emissor da radiação acústica ultrassônica apresenta um padrão de radiação\cite{balanis,pozar} composto por lobos laterais\cite{balanis,pozar} que 
+não são levados em conta, pois a maioria dos sistemas supõem toda radiação recebida como oriunda do lobo central\cite{balanis,pozar}, usualmente 
+modelado como um cone de aproximadamente $30^o$ que varre até 5 metros \cite{murphy}. De acordo com \cite{HC-SR04}, para o dispositivo utilizado 
+nesse trabalho o ângulo de abertura do feixe é de $15^o$ e o alcance, 4 metros.
+
+Além deste problema, o próprio fato de que a direcionalidade do sensor é baixa, i.e. o lobo central é largo, implica numa 
+imprecisão na medida obtida, pois não é possível associar a distância lida a um lugar específico, mas sim a uma região no espaço coberta pelo lobo 
+central \cite{siegwart}.
+
+\subsubsection{Resposta no Ambiente Alvo}
+Por ser um sensor refletivo, a performance do sonar é significativamente afetada pelas características do alvo \cite{everett}.
+Um dos problemas decorrentes desse fato é que determinados objetos apresentam elevada taxa de absorção ou, ao contrário, são atravessados pela 
+radiação, resultando, em ambos os casos, em pouca ou nenhuma energia retornando ao sensor. Dessa forma, estes objetos são invisíveis para o dado 
+método de medição; materiais como espuma, pele e roupas podem absorver as ondas acústicas \cite{siegwart} enquanto objetos com áreas superficiais 
+pequenas, e.g. mesas e cadeiras, podem não ser detectados \cite{murphy}. Vale ressaltar que as propriedades de reflexão, absorção e transmissão 
+são variáveis de acordo com a frequência e com o tipo de radiação, esta podendo ser acústica ou eletromagnética.
+%% TODO achar alguém que falou isso e explica absorção reflexão e transmissão
+Existem outros problemas relativos ao ambiente alvo que não são relacionados à absorção ou transmissão da radiação, mas sim à reflexão e que serão 
+tratados nas 
+seções subsequentes separadamente.
+
+\subsubsection{\textit{Foreshortening}}
+Como a direcionalidade dos sensores ultrassônicos é baixa, isto é a largura de feixe do lobo central é alta, aproximadamente $30^o$, quando o alvo 
+a ser detectado não está perpendicularmente posicionado em relação ao eixo acústico do sensor, o cone que formado pelo lobo principal atinge o objeto 
+em instantes diferentes. Consequentemente, retorna ao sensor em instantes diferentes provocando um desvio na leitura da distância, fazendo com que o 
+obstáculo pareça estar mais próximo do que está na realidade. Por isso este problema é denominado \textit{foreshortening}
+
+\subsubsection{Reflexão especular e \textit{Crosstalk}}
+Analisando ainda a situação em que o obstáculo não está perpendicular ao eixo acústico do sonar, a onda emitida pode ser refletida de tal 
+forma que não retorne ao sensor, caso este em que o obstáculo não é percebido; outra possibilidade é de que esta onda atinja outras superfícies até 
+que por fim retorne ao sensor, desta forma a medida obtida indica que o alvo encontra-se mais distante do que realmente está, fenômeno denominado 
+reflexão especular \cite{roseli,siegwart,everett}.  
+
+Quando utiliza-se uma matriz de sonares, este problema é agravado, pois pode provocar interferência entre sensores ou, do inglês, \textit{crosstalk}.
+De modo que além da medida obtida estar errada, o posicionamento estimado do obstáculo será também errôneo \cite{murphy}, afinal pressupõe-se que o 
+sinal de \textit{echo} é oriundo do pulso de ondas emitido pelo próprio dispositivo.
+No entanto, diferentemente da reflexão especular, este problema pode ser amenizado de diferentes maneiras, vide \cite{2016_artigo_1,2016_artigo_5}.
+
+\subsubsection{Tempo de Resposta} %% TODO:
+
+
+\section{Módulo de rádio frequência}
+
+  \begin{figure}[!htb] %% TODO ver a fonte dessa figura
+    \centering
+    \includegraphics[width=0.5\linewidth]{../../Imagens/nordicc.png}
+    \caption{Módulo de Rádio Frequência baseado no \textit{transceiver} da Nordic nRF24L01+}
+    \label{Nordic}
+  \end{figure}
+Módulo de rádio frequência ( Fig. \ref{Nordic}) de baixo custo e consumo cuja faixa de operação situa-se na banda S das ondas UHF ( \textit{Ultra 
+High Frequency} ), com uma porção dentro da banda ISM \footnote{maiores informações no apêndice}.
+Algumas informações técnicas \cite{nRF} de interesse estão listadas abaixo: 
+\begin{itemize}
+ \item Tensão de alimentação: 1,9V - 3,6V
+ \item Antena em circuito impresso do tipo MIFA(\textit{Meandered Inverted-F Antenna}) \cite{MIFA}
+ \item Frequência de operação: 2,4GHz - 2,525GHz
+ \item Modulação digital do tipo GFSK 
+ \item Apresenta até 126 canais de comunicação \footnote{Válido apenas para as taxas de 250kbps e 1 Mbps; a 2Mbps este valor cai à metade, i.e. 63 
+canais.}
+ \item Taxas de bits: 250kbps, 1Mbps ou 2Mbps
+ \item Potências de saída de transmissão: 0dBm, -6dBm, -12dBm e -18dBm
+ \item Interface com o microcontrolador por SPI à taxa de até 10Mbps
+ \item Pinos de entrada tolerantes a até 5V
+ \item 
+Pacotes recebidos verificados automaticamente, certificando-se da validade do endereço apontado e legitimando a integridade 
+do pacote via CRC(\textit{Cyclic Redundancy Check}) \footnote{Vide apêndice para uma breve explanação sobre CRC}, antes de 
+serem movidos às filas de dados recebidos (\textit{RX FIFO})
+ \item Receptor envia ao transmissor um pacote de confirmação de recepção dos dados pelo mesmo canal (\textit{acknowledgment packet}).
+\end{itemize}
+
+\section{Arduino}
+Trata-se de uma plataforma de prototipação eletrônica aberta, i.e. \textit{open-source hardware}, baseada no microcontrolador de 8 bits da Atmel 
+ATMega328 \cite{ATMega}, programável via serial (ICSP) através de um microcomputador, por exemplo, por meio do ambiente de desenvolvimento 
+\textit{Arduino Software IDE}, \textit{open-source software} e encontra-se no GitHub \cite{ArduSoft}.
+Para programar este dispositivo, foi utilizado um módulo baseado na ponte USB-Serial PL-2303, cuja descrição detalhada pode ser encontrada em 
+\cite{PL2303}.
+
+Algumas informações técnicas \cite{ArduInfo} de interesse estão listadas abaixo: 
+\begin{itemize}
+ \item Dimensões: 17,78mm x 33mm
+ \item Tensão de alimentação recomendável: 5V - 12V
+ \item Memória 
+ \begin{itemize}
+  \item Flash: 32kB 
+  \item SRAM: 2kB
+  \item EEPROM: 1kB
+ \end{itemize}
+
+ \item 20 portas digitais de entrada/saída, das quais 6 podem ser usadas como saídas PWM
+ \item 6 portas de entrada analógicas
+ \item \textit{clock} de 16MHz
+\end{itemize}
+
+
+\section{Bateria} % TODO
+Baterias do tipo LiPo são uma das mais indicadas para veículos elétricos e híbridos, tanto quanto para equipamentos eletrônicos portáteis; no 
+entanto, alguns cuidados precisam ser tomados ao manipulá-la por serem sensíveis a sobrecarga ou descarga abrupta.
+Logo, por questões de segurança e eficiência é necessário haver um sistema eletrônico para gerenciar a recarga deste dispositivo, o qual monitora a 
+tensão de cada uma das células assim como a temperatura em pontos específicos \cite{battery}.
+Neste trabalho foi utilizado o carregador IMAX B6-AC para fazer este serviço.
+\subsection{\textit{C rate}}
+É um parâmetro que descreve a corrente de descarga da bateria em relação à sua capacidade nominal \cite{bateria}.
+Vide a Eq. \ref{C rate} para um exemplo ilustrativo baseado na bateria utilizada neste projeto.
+
+\begin{equation}
+ \label{C rate}
+ 30 C = \frac{ I_{descarga} }{ 2.800 mAh} \Rightarrow I_{descarga} \approx 10.7A
+\end{equation}
+
+
+
+\chapter{Método}
+\section{Estratégia \textit{bottom-up}}
+A estratégia gerencial e organizacional \textit{bottom-up} foi utilizada no desenvolvimento deste projeto. 
+Em função da natureza modular e orientada a comportamentos de arquiteturas reativas \cite{murphy}, a adoção deste método de gerenciamento é quase que 
+uma escolha natural.
+O robô foi dividido em quatro subsistemas, desenvolvidos e testados separadamente: percepção, locomoção, comunicação e navegação (que, no caso deste 
+projeto, consiste no desvio de obstáculos em si). %% TODO citar a arq MOSA aqui pra falar do planejamento??
+Nesta fase de implementação,  boas práticas de engenharia de software foram prioridade, buscando uma implementação que 
+apresente baixo acoplamento  e alta coesão com a expectativa de desenvolver um código que possa ser facilmente entendido e reutilizado em futuros 
+trabalhos afins.
+Em seguida se deu a etapa de integração das partes para, a posteriori, serem feitos testes no conjunto, conforme ilustra o diagrama \ref{WBS}:
+
+\section{Arquitetura Reativa} 
+% creio não termos implementado uma arquitetura de subsumpção pq o robô apresenta estados internos, como transmissão via RF dos USS quando em modo de 
+% navegação e o fato de poder andar caso haja mensagem informando que o SB foi acionado até 500ms antes. 
+
+Optou-se por uma arquitetura de controle fortemente baseada nas informações sensoriais, sem delongas em processamento de sinal para ajustar os dados 
+dos sensores a um modelo ou representação de mundo preconcebido. 
+A razão dessa escolha é decorrência da necessidade de uma resposta rápida do sistema, vantagem da arquitetura reativa em função da sua simplicidade 
+\cite{roseli}.
+
+A latência inerente à obtenção dos dados dos sonares \cite{jones} associada à alta velocidade de operação do robô é a causa desta restrição 
+temporal. % TODO não gostei da palavra temporal nesse contexto
+Como é imprescindível colher dados do ambiente externo a uma taxa que dê um panorama atualizado do que está se passando ao redor do robô 
+\cite{brooks}, reduzir o tempo de resposta do sistema possibilita que o desvio de obstáculos ocorra de maneira mais suave.
+Haja vista que se a detecção for feita com antecedência, medidas menos bruscas podem ser adotadas; em contraste com o caso em que a latência é alta a 
+ponto de que avpercepção das barreiras no caminho se dê na proximidade do veículo.
+
+Os comportamentos implementados no robô se restringem às diferentes manobras de evasão, adotadas com base na proximidade de obstáculos dos cinco 
+sensores, vide \ref{IA}. Os estímulos reguladores consistem na recepção, via RF, de um comando que incite o robô a navegar e do aval mediante 
+recebimento de uma mensagem nos últimos 500ms informando se o botão de segurança foi acionado.
+%TODO: as demais funções implementadas podem ser vistas como comportamentos???
+
+\section{Subsistema de Locomoção}
+Numa visão geral, temos que o Arduino é responsável por emitir um sinal de controle, modulado em largura de pulso, ao ESC.
+Este, por sua vez, é incumbido de energizar os devidos enrolamentos do estator a fim de que o motor BLDC atinja, o mais breve possível, a velocidade 
+desejada, expressa pelo sinal de controle. 
+Resumidamente: o Arduino comanda, o ESC acata a ordem e conduz o motor a cumprí-la utilizando os recursos da bateria.
+O robô apresenta tração dianteira e os motores estão fixos no chassi, logo, faz curvas quando há diferença de velocidade entre os motores.
+
+O código fonte responsável pela produção do pulso PWM nas portas do Arduino foi desenvolvido por Sam Knight e disponibilizado ao público para 
+utilização e modificações de qualquer natureza.
+Esta biblioteca, denominada PWM, pode ser encontrada no GitHub \cite{pwm_lib}.
+
+%% TODO: terminar isso aqui...
+
+\section{Subsistema de Percepção}
+O \textit{software} que manipula os sensores ultrassônicos foi aperfeiçoado aos poucos.
+Primeiramente, buscou-se fazer o dispositivo funcionar, utilizando funções prontas e, portanto, não otimizadas de bibliotecas do Arduino.
+Em seguida, foi construída a matriz de sensores que, conforme a Fig. \ref{fritzing}, tem o pino de \textit{trigger} comum a todos sonares; no 
+entanto, a priori, a leitura dos sonares era feita sequencialmente utilizando o código citado.
+O próximo passo, naturalmente, foi fazer com que os cinco sensores fossem lidos paralelamente, aproveitando o fato de todos dispararem juntos, a fim 
+de minimizar o tempo de resposta na leitura da matriz.
+Em seguida, a fim de reduzir a latência inerente dos sensores ultrassônicos, optou-se por implementar intervalos dinâmicos de medição, isto é, o 
+tempo gasto na percepção dependeria do meio no qual o veículo está inserido.  
+
+Foram feitos testes mais rigorosos nessa última configuração com o objetivo de certificar se há de fato a necessidade de estipular um intervalo 
+mínimo entre leituras sucessivas dos sonares ou se seria possível que esta latência fosse dinâmica, atrelada ao sensor cujo obstáculo detectado 
+encontra-se mais distante.
+Em suma, foi verificado se ciclos de leitura menores do que os 60ms sugeridos em \cite{HC-SR04} realmente ocasionam aumento na incidência de erros 
+nas medidas. Os detalhes acerca destes testes constam na seção de resultados.
+
+A decisão de disparar todos os sonares simultaneamente foi feita com o intuito de reduzir o número de portas utilizadas no Arduino, assim como 
+aumentar a taxa de obtenção dos dados, i.e. a largura de banda, conforme a terminologia adotada  em \cite{roseli}.
+No entanto, as consequências desta deliberação são  severas: agravamento dos fenômenos de \textit{foreshortening} e \textit{crosstalk} 
+\cite{2016_artigo_5}. %% TODO: tira o foreshortening daqui??
+
+\section{Subsistema de Comunicação}
+Este segmento teve como alicerce a biblioteca denominada RF24, diponível em \cite{nrf_lib}, responsável por todo o controle em baixo nível do 
+\textit{transceiver} nRF24L01+.
+Foi implementada em C++ e consiste numa única classe, RF24 (vide Fig.\ref{RF24_ClassDiag}), que provê acesso às funcionalidades básicas do 
+\textit{transceiver} como controle da potência de transmissão do sinal e escolha do canal a ser utilizado, tanto quanto funções que permitem enviar 
+dados por um canal previamente aberto e ler dos canais em que o dispositivo se comporta como receptor; a documentação completa da classe pode ser 
+encontrada em \cite{RF24_class_doc}.
+Assim como todos os códigos de terceiros e programas utilizados nesse projeto, sua utilização é aberta ao público gratuitamente, conforme os termos 
+de uso.
+
+Na definição do escopo do projeto, o papel do módulo de radiofrequência seria de simplesmente garantir a segurança e integridade do robô.
+Neste caso, uma comunicação \textit{simplex} seria suficiente para cumprir a tarefa.
+O módulo transmissor, localizado no acionador remoto, enviava ao robô o nível lógico lido do botão de segurança.
+O \textit{transceiver} do robô assumia o papel de receptor e enviava os dados recebidos por comunicação serial ao Arduino, que ordenava a parada dos 
+motores caso a mensagem indicasse que o botão estava desligado ou se nenhum pacote fosse detectado num período pré-determinado de 1 segundo.
+
+No entanto, após concluir o sistema de acionamento sem fio, concebeu-se a ideia de sofisticar a utilização do módulo de radiofrequência, 
+implementando uma interface de comando capaz de alterar e supervisionar os parâmetros e dados sensoriais do robô, com o intuito de facilitar a etapa 
+de testes com o veículo em movimento, objetivando evitar ao máximo a necessidade de reprogramá-lo.
+
+Ao adicionar essa funcionalidade, surge a necessidade de que ambas partes, i.e. robô e sistema de controle remoto, possam receber e enviar 
+informações um ao outro.
+Como o \textit{transceiver} utilizado tem a funcionalidade de estabelecer comunicação \textit{half-duplex} para cada canal, i.e. bidirecional mas não 
+simultaneamente, pois o receptor pode inserir dados no pacote de confirmação de recepção, \textit{acknowledgment packet} \cite{nRF}, e a biblioteca 
+RF24 apresenta funções prontas que facilitam o emprego deste recurso, foi possível adicionar essa funcionalidade ao projeto sem a necessidade de 
+utilizar dois canais de comunicação.
+
+A interface de comando implementada abrange as seguintes funções:
+\begin{itemize}
+ \item 
+Ajustar a frequência do PWM de cada um dos motores.
+ \item 
+Ajustar a velocidade angular dos motores, que corresponde ao \textit{duty cicle} do sinal de controle, modulado em largura de pulso.
+ \item 
+ Enviar parâmetros do robô ao controlador remoto: frequência dos PWMs, velocidades dos motores, leituras dos sensores ultrassônicos, 
+\textit{status} do botão de segurança de acordo com o veículo.
+ \item 
+Energizar os motores na velocidade estipulada enquanto o botão de segurança estiver acionado e não houver obstáculos que representem perigo ao robô.
+ \item 
+Acionar o sistema de navegação autônoma, também subordinado ao botão de segurança, com tentativas de envio das informações sensoriais e 
+comportamentais a cada tomada de decisão do veículo ao controlador remoto sem suspender a movimentação do robô.
+ \item 
+ Acionar o sistema de navegação autônoma por um número pré-estabelecido de leituras dos sonares, seguido de envio de todos dados coletados ao 
+controlador remoto com o robô parado.
+\end{itemize}
+
+
+\section{Subsistema de Navegação} % TODO subsistema ou estratégia de desvio de obstáculos?
+Consiste na inteligência  do robô, isto é, trata-se do conjunto de comportamentos adotados pelo veículo, através dos quais ele é capaz de 
+desempenhar sua função de desvio de obstáculos. % TODO é realmente necessário falar isso?
+Tal qual \cite{Artigo_3}, a área coberta por um dado sensor ultrassônico foi dividida em três regiões: distante, próxima e perigo.
+Quando a leitura de todos os sonares indica região distante, i.e. obstáculos distam mais do que 3 metros, considera-se que o robô 
+está seguro e pode andar em velocidade máxima; em futuros trabalhos, corresponderá à situação em que o controle do veículo é cedido ao MOSA.
+Caso a medida de algum dos sensores seja menor do que 1 metro - região de perigo - entende-se que o robô está na iminência de uma colisão e deve 
+freiar imediatamente.
+Quando nenhuma destas situações citadas ocorre, isto é, nenhum dos sonares da matriz está na região de perigo, mas há ao menos um deles que não está 
+na região distante, por conseguinte na região próxima, entende-se que há um obstáculo passível de ser contornado.
+
+A estratégia de desvio de obstáculos é semelhante à desenvolvida em \cite{Artigo_1} e define comportamentos bem simples e diretos, como atos reflexos 
+nos animais, garantindo rapidez de resposta uma vez que as leituras dos sensores já foram feitas, vide Fig. \ref{ObstAvoid}.
+Analisa-se cada um dos cinco sonares quanto à região em que se encontra a barreira identificada: 0 para região distante e 1, próxima;
+cada uma das 32 combinações possíveis apresenta um comportamento correspondente: seguir em frente, fazer uma curva aberta, moderada ou brusca.
+Na Tabela \ref{IA} utiliza-se \textquoteleft E\textquoteright{} e  \textquoteleft D\textquoteright{} para designar curvas à esquerda e direita, 
+respectivamente; enquanto os índices \textquoteleft L\textquoteright{},  \textquoteleft M\textquoteright{} e \textquoteleft F\textquoteright{} 
+caracterizam o quão acentuada vai ser a curva: leve, moderada ou forte. % tirar isso daqui e colocar legenda na tabela. 
+
+\section{Integração dos Subsistemas}
+Assim que todos os subsistemas foram implementados, testados e operavam isoladamente de maneira satisfatória, foram feitos testes no conjunto, que 
+indicaram novos problemas a serem tratados. 
+A maioria deles de ordem prática e facilmente contornáveis, no entanto um é digno de nota, pois implicou em uma mudança na disposição física dos 
+componentes do veículo que acabou não solucionando o problema. Maiores detalhes, vide seção de Resultados.

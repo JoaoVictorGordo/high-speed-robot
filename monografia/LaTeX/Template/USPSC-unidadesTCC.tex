@@ -1,0 +1,37 @@
+%% USPSC-unidades.tex
+% Camando para definição do programa de Pós-Graduação, Especialidade do Título e Instituição - 21/09/2015
+\newcommand{\siglaunidade}[1]{
+
+% EESC-TCC ==========================================================================
+    \ifthenelse{\equal{#1}{EESC-TCC}}{
+     			\include{USPSC-Tese-pre-textual/USPSC-TCC-pre-textual-EESC}
+% ---
+    }{
+% IAU ===========================================================================
+        \ifthenelse{\equal{#1}{IAU}}{
+        \include{USPSC-Tese-pre-textual/USPSC-pre-textual-IAU}    
+        }{
+% ICMC ===========================================================================
+        \ifthenelse{\equal{#1}{ICMC}}{
+        \include{USPSC-Tese-pre-textual/USPSC-pre-textual-ICMC}    
+        }{
+% IFSC ===========================================================================
+        \ifthenelse{\equal{#1}{IFSC}}{
+        \include{USPSC-Tese-pre-textual/USPSC-pre-textual-IFSC}    
+        }{
+% IQSC ===========================================================================
+        \ifthenelse{\equal{#1}{IQSC}}{
+        \include{USPSC-Tese-pre-textual/USPSC-pre-textual-IQSC}    
+        }{
+
+                   
+% Outros ========================================================================
+                       % ------------------------------------------------------------------------
+        \include{USPSC-Tese-pre-textual/USPSC-pre-textual-OUTRO} 
+								  }
+                }
+							}
+						}
+				}
+			}
+         

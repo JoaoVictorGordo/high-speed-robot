@@ -1,0 +1,25 @@
+%% Abstract.tex
+% ---
+% Abstract
+% ---
+\autor{Gordo, J.V.B.}
+ \begin{resumo}[Abstract]
+  \begin{otherlanguage*}{english}
+ A high speed autonomous mobile robot with a purely reactive obstacle avoidance technique was implemented. Its purpose is to serve as a navigation 
+test platform for UVAs in MOSA architecture which decouples the critical from the non-critical portion in the embedded system at real time. The 
+vehicle’s perception is composed of an array of five ultrasonic sensors, the locomotion subsystem operates by front-wheel drive made through brushless 
+DC motors, the communication subsystem is made through radio and its functions are: obtaining remote internal data during the autonomous navigation as 
+well as a command interface which could also enable changes on the internal variables of the vehicle without reprograming the microcontroller and, 
+most important, endorse the vehicle’s navigation based on the status of a security button attached to another radio. The navigation strategy consists 
+in classifying the readings from each of the sonars in three regions: distant, warning and close. Based on the region where the sonar is located, a 
+decision is made on which evasion measure is to be carried out, i.e., in the microcontroller’s memory was recorded a table that correlates each 
+combinations of regions to an ordered pair of speed which has to be imposed to the motors so they are able to deviate from the obstacle. However, the 
+readings obtained by the sonars were strongly affected by the mechanical vibrations from the motors, causing spurious readings which led the vehicle 
+to adopt wrong behaviors.
+
+    \vspace{\onelineskip}
+  
+    \noindent 
+    \textbf{Key-words}: autonomous navigation. reactive systems. ultrasonic sensors. obstacle avoidance
+  \end{otherlanguage*}
+ \end{resumo}

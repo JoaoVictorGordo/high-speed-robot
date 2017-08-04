@@ -1,0 +1,21 @@
+
+% resumo em português
+\setlength{\absparsep}{18pt} % ajusta o espaçamento dos parágrafos do resumo
+\begin{resumo}
+Foi implementado um veículo de navegação autônoma de alta velocidade, cuja técnica de desvio de obstáculos é puramente reativa, com o propósito de 
+servir como uma plataforma de testes de navegação de VANTs desenvolvidos na arquitetura MOSA, que desacopla a porção crítica da não crítica do 
+sistema embarcado de tempo real.
+A percepção do veículo consiste em uma matriz de cinco sensores ultrassônicos, o subsistema de locomoção funciona por tração dianteira feita por 
+motores de corrente contínua sem escovas, o subsistema de comunicação é feito via rádio com as funcionalidades de: obtenção remota de dados 
+internos do veículo durante a navegação autônoma, de uma interface de comando que também possibilitasse a mudança de variáveis internas do veículo sem 
+a necessidade de reprogramar o microcontrolador e, o mais importante, de dar ou não ao veículo o aval para navegar com base no \textit{status} de um 
+botão de segurança acoplado a outro rádio.
+A estratégia de navegação consiste em classificar as leituras de cada um dos sonares em três regiões: distante, atenção e próxima; com base em qual 
+região encontra-se cada sonar, toma-se a decisão de qual a medida de evasão a ser realizada, isto é, foi gravada na memória do microcontrolador uma 
+tabela que correlaciona cada uma das combinações de regiões a um par ordenado de velocidades que deve ser imposta aos motores para desviar do 
+obstáculo em questão.
+Contudo, as leituras obtidas pelos sonares foram fortemente afetadas em decorrência de vibrações mecânicas dos motores, que causam leituras 
+espúrias, o que, por sua vez, provoca a adoção de comportamentos errados pelo veículo.
+
+ \textbf{Palavras-chaves}: navegação autônoma. sistemas reativos. sensores ultrassônicos. desvio de obstáculos.
+\end{resumo}

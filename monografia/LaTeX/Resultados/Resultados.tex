@@ -1,0 +1,133 @@
+\chapter{Resultados}
+
+\section{Testes Unitários}
+
+\subsection{Leituras Espúrias nos Sonares}
+% citar leituras espúrias encontradas no teste de din Vs est
+Ao serem feitos testes unitários no \textit{software} de controle dos sensores ultrassônicos, notou-se a existência de leituras espúrias, em 
+condições em que não havia obstáculos dentro da região visível do dispositivo.
+A fim de documentar o problema, posicionou-se o veículo num ambiente em que não havia qualquer obstáculo num raio de 5 metros e foram feitas medições 
+com intervalos de 30ms, 45ms e 60ms; no casa deste teste, não faz diferença se as leituras são dinâmicas ou estáticas pois em todas leituras ao menos 
+um dos sonares não conseguia detectar obstáculos, fazendo com que os intervalos de medida estático e dinâmico fossem iguais sempre.
+
+Os resultados obtidos no teste mostraram que as leituras espúrias são esparsas e, em sua maioria, apontam valores menores do que 10cm.
+A solução concebida para remediar este problema foi basear o comportamento a ser adotado pelo veículo na média aritmética das últimas 5 leituras, 
+excluindo os valores extremos. 
+Desta forma, reduz-se problemas de leituras errôneas em que o sensor falha em detectar o obstáculo dentro do alcance tanto quanto quando detecta-se 
+empecilhos onde não há.
+Com este novo comportamento, houve redução de mais de 40\% do número de medidas espúrias, conforme ilustra a Tabela \ref{vazio}.
+\input{../Tabelas/vazio.tex}
+Uma outra solução plausível para remediar as medidas espúrias que apontam valores muito próximos ao veículo seria aumentar o \textit{blanking time} 
+dos sonares, conforme \citeonline{siegwart}.
+
+\subsection{Comparação entre Intervalos de Medição Dinâmico e Estático}
+A fim de verificar a viabilidade de empregar-se intervalos dinâmicos na percepção do veículo, este foi disposto de frente a uma quina, buscando 
+manter o sensor frontal o mais alinhado ao plano bissetor da junção das duas paredes, perpendiculares entre si, de forma que os sensores das 
+extremidades estivessem aproximadamente equidistantes da respectiva parede mais próxima. 
+Para isso, foram marcados com uma trena pontos no chão que distavam de ambas paredes 30cm, 50cm, 100cm, 150cm e 200cm; para valores 
+maiores do que 200cm não era possível sensibilizar todos sonares ao mesmo tempo, de modo que ao menos um deles não conseguia detectar obstáculos, o 
+que não faria sentido para o teste em questão.
+Em cada um destes pontos foram feitas medições estáticas e dinâmicas com intervalos de 30ms, 45ms e 60ms. Numa situação ideal, em que todos sonares 
+conseguissem sempre encontrar os obstáculos, não faria diferença para as medidas dinâmicas qual o intervalo estipulado, pois a medição seria 
+encerrada assim que todos sonares houvessem sido sensibilizados; no entanto, em algumas leituras houve falhas na detecção, apontando erroneamente a 
+inexistência de obstáculo.
+Em cada um dos testes foram armazenadas 150 leituras consecutivas em um \textit{buffer} local que, ao ser preenchido, cessava o acionamento dos 
+sonares e imprimia os dados via interface serial antes de começar a próxima medição.
+Nos dados obtidos em cada uma dessas medições foram feitos cálculos de média e desvio padrão sujos e limpos\footnote{Medidas limpas são aquelas cuja 
+métrica foi calculada descartando-se as leituras em que o respectivo sonar falhou em encontrar o obstáculo. No caso do teste de 30cm, foram 
+excluídas medidas abaixo de 10cm também.}, contagem dos resultados, e expresso em termos percentuais nas tabelas a seguir, que desviassem em mais do 
+que 15 centímetros em relação à média limpa das leituras, exceto para o caso do teste feito a 30cm das paredes, em que foram contadas medidas que 
+desviaram mais do que 5 centímetros da média limpa.
+
+\subsubsection{Teste 30cm}
+Neste teste as leituras dinâmicas se mostraram consideravelmente mais imprecisas, chegando a apresentar mais de 10\% de erros em alguns testes; no 
+entanto, é preciso levar em consideração o quão mais rápidas são as medições dinâmicas que, no caso deste teste, durariam por volta de 2ms.
+Apesar de todas as leituras de todos sonares terem encontrado obstáculo, o desvio padrão das leituras com intervalo dinâmico chegou a mais de 8cm 
+para o sensor frontal em decorrência da aparição de medidas espúrias bem abaixo da média, da ordem de grandeza de 10cm. 
+Este tipo de erro de leitura constitui um problema sério para a aplicação em pauta neste projeto, pois a detecção de falsos obstáculos tão próximos 
+do veículo causaria o desligamento dos motores para, logo em seguida, serem ligados novamente como consequência das leituras corretas; como resultado 
+deste erro, a trajetória acaba sendo imprevisível, pois os motores reagiriam diferentemente ao comando de parada, já que podem estar em velocidades 
+diferentes entre si. Isto é, caso no momento dessa leitura espúria um dos motores esteja com a rotação mais baixa, pode ser que ele trave a roda mais 
+rapidamente do que o outro, fazendo com que o veículo faça uma curva brusca que possa causar uma colisão, por exemplo.
+ \input{../Tabelas/30.tex}
+% \pagebreak
+\subsubsection{Teste 50cm}
+Neste teste, houve grande incidência de medidas espúrias da ordem de grandeza de 100cm no sensor mais à direita do veículo, denominado Sensor 4 na 
+Tabela \ref{50cm}, causando desvios padrão maiores do que 25cm para determinados testes, mesmo tendo sido encontrado obstáculo em todas medidas.
+Para os demais sensores, os resultados obtidos foram satisfatórios, pois as medidas espúrias que surgiram foram esparsas e, desta vez, apareceram 
+mais frequentemente nos testes com leituras estáticas.
+  \input{../Tabelas/50.tex}
+\subsubsection{Teste 100cm}
+Neste teste, não houve diferença significativa dos resultados obtidos anteriormente, houve apenas uma leitura destoante de mais do que 15cm 
+da média limpa: 116cm. 
+  \input{../Tabelas/100.tex}
+\subsubsection{Teste 150cm}
+Pela primeira vez surgiram leituras em que algum sonar não encontrou obstáculos, todas ocorreram no sensor da extremidade direita, no entanto, não 
+houve distinção notória de incidência deste fenômeno dos intervalos de medições fixos em relação aos variáveis, de modo que, para a discussão em 
+pauta, essas medidas não agregam valor significativo.
+Tal qual ocorreu no teste de 100cm, as leituras de intervalo dinâmico apresentaram um desempenho levemente superior em relação a medidas destoantes.
+  \input{../Tabelas/150.tex}
+\subsubsection{Teste 200cm}
+No teste em que o carrinho estava a 200 cm das paredes, foram registradas no sensor frontal, em sua grande maioria, medidas em dois intervalos 
+estreitos: entre 185cm e 195cm, e de 265cm a 275cm, o que fez com que as medidas de desvio padrão fossem bem altas, chegando a mais de 40cm.
+No entanto, é interessante notar que o segundo intervalo é aproximadamente o primeiro multiplicado pela raiz quadrada de dois, logo, é possível que 
+as medidas obtidas no segundo intervalo sejam dos pacotes de ondas acústicas emitidas pelo sonar frontal, enquanto as do primeiro intervalo seriam 
+decorrência de \textit{crosstalk}.
+De qualquer forma, neste teste, no que se refere ao sensor frontal, não é possível extrair grandes informações no que concerne a qual tipo de medição 
+é melhor, logo, ele será desconsiderado na análise a seguir.
+
+No sensor da extremidade esquerda, denominado Sensor 0 na Tabela \ref{200cm}, houve diversas medidas em que não foi detectado o obstáculo, no 
+entanto, não houve discrepância considerável na ocorrência deste fenômeno dentre os dois tipos de intervalos de medição.
+
+De um modo geral, a partir dos dados coletados neste teste, nota-se que não há deterioração das medidas obtidas dos sonares quando utiliza-se 
+intervalos dinâmicos que, no caso deste, durariam em média menos do que 15ms por leitura, o que possibilitaria pelo menos o dobro de medidas 
+para um mesmo período.
+  \input{../Tabelas/200.tex}
+
+\section{Testes de Integração}
+\subsection{Interferência dos BLDC nos Sonares}
+Notou-se que em determinadas condições o robô ia de encontro ao obstáculo ao invés de efetuar o desvio. 
+Após serem analisados os dados dos sensores nessas circunstâncias, observou-se a existência de ruídos nos sensores, que causavam a adoção 
+destes comportamentos errados.
+
+Ao perceber o problema, novos testes foram engendrados a fim de descobrir a natureza da falha.
+As hipóteses concebidas eram as seguintes: \textit{crosstalk}, curto circuito entre pinos do Arduino, falha na lógica do \textit{software} ou 
+interferência dos motores nos sensores.
+
+Para eliminar a possibilidade de que uma das portas da placa de prototipação estivesse interferindo na outra de alguma maneira, a 
+ligação dos sensores ultrassônicos no Arduino foram mudadas mas o problema se manteve.
+O mesmo foi feito no \textit{software}, i.e. foi alterada a disposição dos sensores ultrassônicos no código. 
+Especificamente falando, foram trocados os parâmetros que correlacionam a ligação física do pino de \textit{echo} dos dispositivos a sua variável 
+correspondente na matriz de estruturas do tipo \textit{sensor\_t}, denominada no programa por USS, e, mais uma vez, o defeito persistiu.
+Adicionalmente a essa modificação no \textit{software}, foram feitas medições com os motores desligados, nas quais a falha em questão não ocorreu, 
+evidenciando que a natureza do problema não era do código e nem os pinos da placa de prototipação.
+
+O teste seguinte consistiu em desacoplar os sensores ultrassônicos da carcaça do veículo apontando-os para um lugar livre de obstáculos e ligar os 
+motores com os sonares sendo segurados na mão. 
+No resultado, observou-se a desaparição total das leituras espúrias, confirmando a hipótese de que os BLDC causavam de alguma maneira a distorção na 
+percepção do robô.
+Em vista disso, supôs-se que a natureza da interferência seria em razão da proximidade entre os dispositivos, como interferência eletromagnética nos 
+pinos de \textit{echo} dos sonares ou então de ondas acústica na banda de operação dos sensores, e optou-se por erguer os sensores a uma altura 
+na qual não houvesse interferência suficiente a ponto de provocar erros de medição.
+
+Em seguida foram feitas modificações na estrutura do veículo para distanciar os sonares dos motores: foram fixadas três hastes metálicas de 30 
+centímetros na carcaça do veículo, nestas foram fixados suportes nos quais foi parafusado o para-choque do veículo, onde estavam colados com 
+cola epóxi os 5 sensores ultrassônicos. Além disso, as ligações dos sonares entre si e com o Arduino foram refeitas, soldando de fato os fios ao 
+invés de serem utilizados \textit{jumpers} como outrora, com o intuito de reduzir ao máximo qualquer tipo de ruído causado por mal contato.
+
+Após isso, foi engendrado um novo teste a fim de constatar se com a nova disposição o problema havia sido sanado: cada uma das combinações de 
+velocidades dos motores foi mantida por dez segundos enquanto os sonares faziam as medições.
+Os dados obtidos, vide Tabela \ref{teste_4}, apontaram que o problema persistia, apresentando inclusive detecções espúrias de obstáculos a mais 
+do que 400cm, distância que se encontra além do alcance dos sonares.
+
+\input{../Tabelas/interf-motor-sonar_4.tex}
+
+Enquanto era realizado o teste, notou-se que os fios oscilavam em decorrência da vibração dos motores, o que levou a cogitar a hipótese de que essa 
+seria de fato a natureza da interferência entre os sensores ultrassônicos e os motores, i.e. as vibrações mecânicas dos BLDC ressoavam nos fios 
+provocando alguma espécie de mal contato, seja pela solda mal feita ou fios partidos.
+Diante desse cenário, foi realizado um novo teste nas mesmas condições em que desparafusou-se o para-choque no qual os sensores estão fixos, das 
+hastes metálicas e foram colhidos dados  com ele apoiado no chão. Nestas circunstâncias houve redução considerável do ruído que, de um modo geral, se 
+restringiu a um único sonar, conforme a Tabela \ref{teste_2}.
+
+
+\input{../Tabelas/interf-motor-sonar_2.tex}

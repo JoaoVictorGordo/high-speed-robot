@@ -1,0 +1,61 @@
+\chapter{Conclusão}
+
+Com o processamento dos dados lidos pelos sonares, foi possível reduzir os efeitos
+de falsas detecções de obstáculos. Quanto à decisão entre optar por intervalos estáticos
+ou dinâmicos de medição, foi comprovado que há de fato menor confiabilidade nas medidas
+obtidas utilizando-se intervalos dinâmicos no que concerne a obstáculos mais próximos
+ao veículo enquanto que, para obstáculos mais longínquos, a diferença não é tão notória.
+De forma que a diminuição no tempo de resposta dos sonares acaba sendo maior do que
+o aumento da incidência de erros de leitura, o que faz com que seja melhor se sujeitar a
+obtenção de dados menos confiáveis porém mais atualizados, pois é possível tratar esses
+eventuais erros utilizando métodos estatísticos como a teoria Dempster-Shafer, conforme foi feito em
+ \citeonline{Artigo_11}, ou inferência Bayesiana, conforme \citeonline{Artigo_7}.
+ 
+No entanto, o problema da interferência dos motores nos sonares ainda não foi
+resolvido e constitui um contratempo grave ao bom funcionamento do veículo e que,
+portanto, precisa ser resolvido para poder dar prosseguimento ao projeto. É preciso reduzir
+o impacto das vibrações mecânicas dos BLDC no circuito que liga a placa de prototipação
+aos sonares. Uma abordagem que poderia mitigar o fenômeno seria fazer uma placa de
+circuito impresso, na qual os sonares seriam soldados diretamente, eliminando totalmente
+a utilização de fios para fazer contato entre os dispositivos.
+
+Quanto ao subsistema de comunicação, por se tratar de um módulo de baixo
+consumo de potência, há uma limitação no alcance do dispositivo. No entanto, apesar
+de perceptível, essa restrição não constituiu um problema nos testes feitos no veículo,
+que manteve a comunicação funcionando mesmo em distâncias de aproximadamente 10
+metros as custas de um aumento na perda de pacotes.
+
+O subsistema de navegação ainda tem muito o que melhorar pois, como há uma
+gama de apenas 8 possíveis medidas de evasão, a resposta do veículo é pouco adaptável ao
+ambiente externo, de modo que muitas vezes o comportamento adotado é muito suave,
+causando colisões, ou muito brusco, causando desvios de rota desnecessários. Utilizando-se
+estratégias de desvio de obstáculos em que a rotação dos motores é obtida por meio de
+um controlador PID, ou Virtual Force Field Method, conforme \citeonline{2016_artigo_2}.
+
+
+
+
+% Com o processamento dos dados lidos pelos sonares, foi possível reduzir os efeitos de falsas detecções de obstáculos.
+% Quanto à decisão entre optar-se por intervalos estáticos ou dinâmicos de medição, foi comprovado que há de fato menor confiabilidade nas medidas 
+% obtidas utilizando-se intervalos dinâmicos no que concerne a obstáculos mais próximos ao veículo enquanto que para obstáculos mais longínquos a 
+% diferença não é tão notória.
+% De forma que a diminuição no tempo de resposta dos sonares acaba sendo maior do que o aumento da incidência de erros de leitura, o que faz com que 
+% seja melhor se sujeitar a obtenção de dados menos confiáveis porém mais atualizados, pois é possível tratar esses eventuais erros utilizando 
+% métodos 
+% estatísticos como a teoria Dempster-Shafer, conforme foi feito em \cite{Artigo_11}, ou inferência Bayesiana, conforme \cite{Artigo_7}.
+% 
+% No entanto, o problema da interferência dos motores nos sonares ainda não foi resolvido e constitui um contratempo grave ao bom funcionamento do 
+% veículo e que, portanto, precisa ser resolvido para poder dar prosseguimento ao projeto. 
+% É preciso reduzir o impacto das vibrações mecânicas dos BLDC no circuito que liga a placa de prototipação aos sonares.
+% Uma abordagem que poderia mitigar o fenômeno seria fazer uma placa de circuito impresso, na qual os sonares seriam soldados diretamente, eliminando 
+% totalmente a utilização de fios para fazer contato entre os dispositivos.
+% 
+% Quanto ao subsistema de comunicação, por se tratar de um módulo de baixo consumo de potência, há uma limitação no alcance do dispositivo. 
+% No entanto, apesar de perceptível, essa restrição não constituiu um problema nos testes feitos no veículo, que mantinha a comunicação funcionando 
+% mesmo em distâncias de aproximadamente 10 metros as custas de um aumento na perda de pacotes.
+% 
+% O subsistema de navegação ainda tem muito o que melhorar pois, como há uma gama de apenas 8 possíveis medidas de evasão, a resposta do 
+% veículo é pouco adaptável ao ambiente externo, de modo que muitas vezes o comportamento adotado é muito suave, causando colisões, ou muito brusco, 
+% causando desvios de rota desnecessários.
+% Utilizando-se estratégias de desvio de obstáculos em que a rotação dos motores é obtida por meio de um controlador PID, ou \textit{Virtual Force 
+% Field Method}, conforme \cite{2016_artigo_2}.

@@ -1,0 +1,86 @@
+ \chapter{Introdução}
+O presente trabalho consiste na implementação de um veículo autônomo de alta
+velocidade, desenvolvido sob o paradigma de sistemas puramente reativos, cuja finalidade
+é servir como uma plataforma terrestre de testes de estratégias de navegação de Veículos
+Aereos Não Tripulados, VANTs, dentro da arquitetura MOSA, \textit{Mission Oriented Sensor
+Array}. Isto é, na arquitetura MOSA, o escopo deste projeto consiste na porção relativa
+ao controlador de navegação, que é responsável por cuidar da integridade da aeronave, enquanto a parte
+orientada à missão é o que pretende-se testar utilizando o veículo. A necessidade de
+se desenvolver um veículo terrestre para testar estratégias de voo se dá pelo fato de que este é
+um sistema embarcado crítico cuja falha pode resultar em acidentes graves, logo, caso o
+comportamento do MOSA desenvolvido seja extensivamente testado em um ambiente livre
+de riscos utilizando-se o veículo, há menos risco de eventuais danos provocados por mal
+funcionamento. 
+Como o intuito do projeto é simular um \textit{drone} para testar novos algoritmos de navegação para que 
+se tenha uma segurança maior no funcionamento desejado do \textit{software} antes de serem feitos os devidos 
+testes utilizando de fato uma aeronave, o veículo desenvido opera em velocidades similares às de VANTs,
+podendo atingir até \unitfrac[100]{km}{h}.
+Maiores detalhes acerca da arquitetura MOSA serão abordados na seção
+de Embasamento Teórico.
+
+O projeto pode ser dividido em 4 subsistemas: percepção, locomoção, comunicação
+e navegação. A percepção é feita através de uma matriz de cinco sensores ultrassônicos
+de baixo custo, que são disparados simultaneamente a fim de reduzir o tempo gasto
+com obtenção dos dados do ambiente externo. Como consequência disso, obtém-se dados
+menos confiáveis pois são intensificados efeitos colaterais como o crosstalk, que não pode ser
+eliminado processando medidas consecutivas, conforme \citeonline{2016_artigo_1}. Além disso, buscou-se verificar
+o quão significativo é o impacto na confiabilidade das medidas caso os ciclos de leitura dos
+sonares seja determinado de acordo com as circunstâncias do meio, isto é, caso não haja
+um intervalo de medição fixo e pré-determinado, denominado intervalo estático de agora
+em diante, de modo que o período gasto na percepção estivesse atrelado apenas ao tempo
+gasto pelo sonar que detectou o obstáculo mais distante do veículo, denominado intervalo
+dinâmico. Ao adotar intervalos dinâmicos, reduz-se o tempo entre leituras consecutivas,
+o que pode fazer com que vibrações residuais da membrana responsável por emitir as
+ondas acústicas sensibilize o elemento receptor provocando falsas leituras, conforme \citeonline{jones}.
+Maiores detalhes acerca do princípio de funcionamento dos sensores ultrassônicos, assim
+como vantagens e desvantagens deste sensor encontram-se na seção de Materiais desta
+monografia.
+
+Para a locomoção do veículo, são utilizados dois motores \textit{brushless} de corrente
+contínua, de modo que a tração é dianteira. Logo, o veículo faz curvas em razão da diferença
+de velocidade entre os BLDC e, por se tratar de motores usualmente utilizados em VANTs,
+atinge velocidade de até  \unitfrac[80]{km}{h}.
+Como o controle de motores sem escovas não é trivial de
+ser feito, foram utilizados controladores eletrônicos de velocidade, ESCs, como elemento
+intermediador entre o microcontrolador e os motores. Desta forma, todo o tratamento de
+mais baixo nível no que concerne o acionamento das bobinas dos motores foi designado
+a este dispositivo, enquanto o microcontrolador se responsabiliza por fornecer aos ESCs
+a velocidade que pretende-se obter do seu respectivo motor.
+O sistema de comunicação tem o propósito de: fornecer feedback dos dados internos
+do veículo, como percepção e velocidade dos motores; regular o acionamento dos motores,
+pois repassa ao microcontrolador informações de um botão de segurança, que emite sinais
+ao veículo, autorizando-o ou não a navegar; e, finalmente, de servir como uma interface de
+comandos na qual é possível controlar remotamente o veículo.
+\footnote{Entenda-se por veículo não só a parte física como rodas, motores e dispositivos mas, também, todo o \textit{software} responsável por gerir 
+o automóvel.}.
+
+Quanto ao subsistema de navegação, temos que este consiste na inteligência artificial
+do veículo, isto é, qual é a estratégia utilizada para efetuar o desvio de obstáculos com
+base nos dados colhidos pelos sonares. A técnica de desvio de obstáculos implementada
+é a mais simples possível: trata-se de uma função que mapeia as leituras dos sonares -
+categorizadas em três regiões: perigo, atenção e distante - em um par de velocidades
+angulares - categorizados quanto a intensidade em forte, médio e leve, e quanto à direção
+em esquerda ou direita - a serem impostas aos motores de acordo com qual a combinação
+de regiões lida pela matriz de sonares, conforme a Eq. \ref{nav}. A tabela verdade que relaciona
+domínio e contradomínio da função de desvio de obstáculos consta no Apêndice, vide Tabela \ref{IA}.
+
+\begin{equation}
+\label{nav}
+T:R^5 \rightarrow S
+\end{equation}
+$$\quad \textrm{em que:} \quad R=\{distante, perigo, atenção\}, \quad S=\{E_L, E_M, E_F, D_L, D_M, D_F\}$$
+
+Note que cada um dos elementos do conjunto S são pares ordenados que representam a
+velocidade angular dos motores.
+
+\input{../Tabelas/table.tex}
+
+A título de ilustração, para deixar mais claro o propósito deste projeto, podemos
+supor que um MOSA esteja sendo desenvolvido com o propósito de percorrer uma rota
+previamente selecionada, utilizando-se de GPS, acelerômetro e magnetômetro para a
+missão. Este poderia ser testado no veículo antes de ser colocado para voar, de forma que
+o veículo autônomo desempenharia a função da aeronave, sendo responsável por desviar
+de eventuais obstáculos quando necessário, e quando o caminho estiver livre, o controle
+do veículo seria repassado ao MOSA, mas ainda sob sua supervisão. Dessa forma, quando
+em posse do veículo, o MOSA desempenharia sua missão, que no exemplo citado seria
+percorrer \textit{checkpoints}.

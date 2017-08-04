@@ -1,0 +1,42 @@
+% Please add the following required packages to your document preamble:
+% \usepackage{multirow}
+\begin{table}[]
+\centering
+\caption{My caption}
+\label{my-label}
+\begin{tabular}{|c|c|ccccc|}
+\hline
+\textbf{Motores}                & \textbf{Medida}  & \textbf{Sensor 0} & \textbf{Sensor 1} & \textbf{Sensor 2} & \textbf{Sensor 3} & \textbf{Sensor 4} \\ \hline
+\multirow{3}{*}{STP}            & Média            & 395               & 397               & 400               & 398               & 303               \\
+                                & \textless 400    & 1,72\%            & 1,15\%            & 0\%            & 0,57\%            & 53,45\%           \\
+                                & \textgreater 400 & 0\%            & 0\%            & 0\%            & 0\%            & 0\%            \\ \hline
+\multirow{3}{*}{E\_L}           & Média            & 182               & 263               & 400               & 339               & 247               \\
+                                & \textless 400    & 90,91\%           & 49,49\%           & 0\%            & 36,36\%           & 88,89\%           \\
+                                & \textgreater 400 & 3,03\%            & 0\%            & 0\%            & 12,12\%           & 0\%            \\ \hline
+\multirow{3}{*}{E\_M}           & Média            & 179               & 158               & 400               & 388               & 258               \\
+                                & \textless 400    & 98,00\%           & 90\%           & 0\%            & 7,00\%            & 85,00\%           \\
+                                & \textgreater 400 & 2,00\%            & 0\%            & 0\%            & 1,00\%            & 0\%            \\ \hline
+\multirow{3}{*}{E\_F}           & Média            & 140               & 386               & 396               & 395               & 260               \\
+                                & \textless 400    & 98,99\%           & 5,05\%            & 1,01\%            & 4,04\%            & 84,85\%           \\
+                                & \textgreater 400 & 1,01\%            & 0\%            & 0\%            & 3,03\%            & 0\%            \\ \hline
+\multirow{3}{*}{D\_L}           & Média            & 180               & 184               & 400               & 395               & 316               \\
+                                & \textless 400    & 89,90\%           & 80,81\%           & 0\%            & 5,05\%            & 50,51\%           \\
+                                & \textgreater 400 & 4,04\%            & 0\%            & 0\%            & 2,02\%            & 0\%            \\ \hline
+\multirow{3}{*}{D\_M}           & Média            & 394               & 397               & 400               & 394               & 242               \\
+                                & \textless 400    & 2,02\%            & 1,01\%            & 0\%            & 3,03\%            & 94,95\%           \\
+                                & \textgreater 400 & 0\%            & 0\%            & 0\%            & 0\%            & 0\%            \\ \hline
+\multirow{3}{*}{D\_F}           & Média            & 355               & 400               & 400               & 400               & 251               \\
+                                & \textless 400    & 23,00\%           & 0\%            & 0\%            & 0\%            & 89,00\%           \\
+                                & \textgreater 400 & 0\%            & 0\%            & 0\%            & 0\%            & 0\%            \\ \hline
+\multirow{3}{*}{FS}             & Média            & 221               & 292               & 400               & 397               & 266               \\
+                                & \textless 400    & 69,70\%           & 40,40\%           & 0\%            & 4,04\%            & 80,81\%           \\
+                                & \textgreater 400 & 2,02\%            & 0\%            & 0\%            & 2,02\%            & 0\%            \\ \hline
+\multirow{3}{*}{Fre}            & Média            & 217               & 181               & 400               & 245               & 229               \\
+                                & \textless 400    & 76,77\%           & 75,76\%           & 0\%            & 75,76\%           & 87,88\%           \\
+                                & \textgreater 400 & 9,09\%            & 0\%            & 0\%            & 5,05\%            & 0\%            \\ \hline
+\multirow{4}{*}{\textbf{TOTAL}} & Média            & 263               & 303               & 400               & 374               & 267               \\
+                                & Desvio Padrão    & 132               & 133               & 13                & 78                & 75                \\
+                                & \textless 400    & 56,61\%           & 35,33\%           & 0,10\%            & 13,95\%           & 77,48\%           \\
+                                & \textgreater 400 & 2,17\%            & 0\%            & 0\%            & 2,58\%            & 0\%            \\ \hline
+\end{tabular}
+\end{table}
