@@ -1,12 +1,15 @@
 # high-speed-robot
-Development of a high speed autonomous robot to serve as a test platform for UAV control strategies
-- This project makes use of a RaspberryPi board to control the robot
-- The Raspberry presented some problems when driving the robot, because it is sensible to noise and vibrations caused by eventual high-speed collisions of the robot. Nevertheless it was able to successfully control the robot
-- The design of an Arduino based controlled was then started, since Arduino is a more robust platform and can be directly conected to the ESC and Sonars without any voltage conversor.
-- The next version (coming shortly) will combine both Arduino and RaspberryPi to controll  the lower level (Arduino: sonar reading,  motor speed and obstacle avoidance) and the high level software (RaspberryPi: Internet connection, Image processing, and Bio-inspired IA such as Neural networks and Evolutionary Algorithms)
-
-
-Unmanned aerial vehicle, or UAV, is a description that covers everything from planes which wings measure more than 100 meters wide to helicopters as light as 80g. UAVs also vary in regard to their control; they can have an operator piloting the aircraft remotely or not. The last one is called autonomous. Autonomous aircrafts are still gaining ground in Brazil, and only in 2013 the first authorization for an experimental flight was emitted by ANAC. Autonomous testing tends to be dangerous because there is always the risk of the high-speed airplane losing control or crashing. In order to make aerial testing safer, it is proposed the development of an autonomous ground mobile robot of small proportions that uses the Raspberry Pi board. Using an autonomous robot that follows these guidelines as a startup point, it is proposed the use of high speed brushless DC motors to traction the robot. Thus, it is expected to obtain an autonomous ground system capable of moving close to UAVs speed. Therefore, be able to perform tests on autonomous characteristics in a safer environment before applying it to the aircrafts. Ultrasound distance sensors will be used as input do the navigation system, and tests will be performed to validate their use in the proposed scenario. The navigation system to be implemented will follow Rodney Brooks’ subsumption architecture. It is a structure that easily allows the addition of new behaviors, and thus, it is useful for a platform that will perform different types of tests. New functionalities can be added and edited without modifying the behaviors developed in this work.
-
-Keywords: Mobile robotics, Raspberry Pi, brushless DC motor, ultrasound sensors, autonomous navigation.
+This project was developed as term paper on major in Electrical Engineering and minor in Electronics attended at São Carlos School of Engineering University of São Paulo from the second semester of 2015 to 2016.
+ A high speed autonomous mobile robot with a purely reactive obstacle avoidance technique was implemented. Its purpose is to serve as a navigation 
+test platform for UVAs in MOSA architecture which decouples the critical from the non-critical portion in the embedded system at real time. The 
+vehicle’s perception is composed of an array of five ultrasonic sensors, the locomotion subsystem operates by front-wheel drive made through brushless 
+DC motors, the communication subsystem is made through radio and its functions are: obtaining remote internal data during the autonomous navigation as 
+well as a command interface which could also enable changes on the internal variables of the vehicle without reprograming the microcontroller and, 
+most important, endorse the vehicle’s navigation based on the status of a security button attached to another radio. The navigation strategy consists 
+in classifying the readings from each of the sonars in three regions: distant, warning and close. Based on the region where the sonar is located, a 
+decision is made on which evasion measure is to be carried out, i.e., in the microcontroller’s memory was recorded a table that correlates each 
+combinations of regions to an ordered pair of speed which has to be imposed to the motors so they are able to deviate from the obstacle. However, the 
+readings obtained by the sonars were strongly affected by the mechanical vibrations from the motors, causing spurious readings which led the vehicle 
+to adopt wrong behaviors.
+Keywords: Mobile robotics, Arduino, brushless DC motor, ultrasound sensors, autonomous navigation.
  
